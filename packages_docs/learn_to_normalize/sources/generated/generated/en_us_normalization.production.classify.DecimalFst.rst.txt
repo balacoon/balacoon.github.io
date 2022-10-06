@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.DecimalFst
+====================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: DecimalFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

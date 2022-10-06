@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.FractionFst
+=====================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: FractionFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.verbalize.verbatim &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../static/documentation_options.js"></script>
+        <script src="../../../../static/jquery.js"></script>
+        <script src="../../../../static/underscore.js"></script>
+        <script src="../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../static/doctools.js"></script>
+    <script src="../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>en_us_normalization.production.verbalize.verbatim</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for en_us_normalization.production.verbalize.verbatim</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+<span class="sd">Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.</span>
+<span class="sd">Copyright 2015 and onwards Google, Inc.</span>
+
+<span class="sd">Verbalizes verbatim - anything that is not classified</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.english_utils</span> <span class="kn">import</span> <span class="n">get_data_file_path</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.verbalize.cardinal</span> <span class="kn">import</span> <span class="n">CardinalFst</span>
+<span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">LOWER</span><span class="p">,</span>
+    <span class="n">NOT_ALPHA</span><span class="p">,</span>
+    <span class="n">SIGMA</span><span class="p">,</span>
+    <span class="n">SPACE</span><span class="p">,</span>
+    <span class="n">TO_LOWER</span><span class="p">,</span>
+    <span class="n">TO_UPPER</span><span class="p">,</span>
+    <span class="n">UPPER</span><span class="p">,</span>
+    <span class="n">delete_extra_space</span><span class="p">,</span>
+    <span class="n">delete_space</span><span class="p">,</span>
+    <span class="n">insert_space</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="VerbatimFst"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.verbalize.VerbatimFst.html#en_us_normalization.production.verbalize.VerbatimFst">[docs]</a><span class="k">class</span> <span class="nc">VerbatimFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finite state transducer for verbalizing verbatim, i.e. any leftovers after classification into semiotic classes.</span>
+<span class="sd">    Verbatim verbalization is the last effort. If it comes to it, likely existing semiotic classes require expansion.</span>
+<span class="sd">    Strategy for verbatim verbalization:</span>
+
+<span class="sd">    - sequences of letters are spelled letter by letter (i.e. converted to upper case for pronunciation generation)</span>
+<span class="sd">    - digits are pronounced digit by digit</span>
+<span class="sd">    - know symbols (&quot;%&quot; or &quot;&amp;&quot;) are converted to spoken form (&quot;percent&quot; or &quot;ampersand&quot;)</span>
+<span class="sd">    - unknown, non-ascii symbols are dropped (we should avoid it as much as possible!)</span>
+
+<span class="sd">    Example of input/output strings:</span>
+
+<span class="sd">    - verbatim|name:sa12| -&gt; SA one two</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VerbatimFst.__init__"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.verbalize.VerbatimFst.html#en_us_normalization.production.verbalize.VerbatimFst.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cardinal</span><span class="p">:</span> <span class="n">CardinalFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        constructor of verbatim verbalizer</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cardinal: CardinalFst</span>
+<span class="sd">            verbalizer of cardinal numbers to reuse for numbers expansion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;verbatim&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cardinal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cardinal</span> <span class="o">=</span> <span class="n">CardinalFst</span><span class="p">()</span>
+
+        <span class="c1"># expand digits</span>
+        <span class="n">digits</span> <span class="o">=</span> <span class="n">cardinal</span><span class="o">.</span><span class="n">get_digit_by_digit_fst</span><span class="p">()</span>
+        <span class="c1"># expand known symbols</span>
+        <span class="n">known_symbols</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">string_file</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;symbols.tsv&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="c1"># remove unknown symbols</span>
+        <span class="n">unknown_symbols</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">NOT_ALPHA</span><span class="p">)</span>
+        <span class="c1"># partial verbatim verbalization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partial_verbatim</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">insert_space</span> <span class="o">+</span> <span class="n">digits</span>
+            <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">insert_space</span> <span class="o">+</span> <span class="n">known_symbols</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">unknown_symbols</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbatim_spelling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_verbatim_verbalization</span><span class="p">(</span>
+            <span class="n">letter_case</span><span class="o">=</span><span class="s2">&quot;to_upper&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbatim_pronunciation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_verbatim_verbalization</span><span class="p">(</span>
+            <span class="n">letter_case</span><span class="o">=</span><span class="s2">&quot;to_lower&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbatim_as_is</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_verbatim_verbalization</span><span class="p">(</span><span class="n">letter_case</span><span class="o">=</span><span class="s2">&quot;keep&quot;</span><span class="p">)</span>
+        <span class="c1"># remove space at the beginning</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbatim_spelling</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cdrewrite</span><span class="p">(</span>
+            <span class="n">delete_space</span><span class="p">,</span> <span class="s2">&quot;[BOS]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">SIGMA</span>
+        <span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;name:&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">graph</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_tokens</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_build_verbatim_verbalization</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">letter_case</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;to_upper&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        helper function that builds expansion of letters, known symbols and digits,</span>
+<span class="sd">        drops unknown symbols. reuses expansion of digits and known/unknown symbols</span>
+<span class="sd">        that are stored as fields of a class</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        letter_case: str</span>
+<span class="sd">            flag that defines what to do with letters</span>
+
+<span class="sd">            - to_upper: convert all letters to upper case, so they will be spelled at pronunciation generation</span>
+<span class="sd">            - to_lower: convert all letters to lower case, so pronunciations will be generated for continuous</span>
+<span class="sd">              sequences of letters</span>
+<span class="sd">            - keep: keeps the letters case as is, in case some preprocessing already done</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">letters</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">SPACE</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">letter_case</span> <span class="o">==</span> <span class="s2">&quot;to_upper&quot;</span><span class="p">:</span>
+            <span class="n">letters</span> <span class="o">|=</span> <span class="n">TO_UPPER</span> <span class="o">|</span> <span class="n">UPPER</span>
+        <span class="k">elif</span> <span class="n">letter_case</span> <span class="o">==</span> <span class="s2">&quot;to_lower&quot;</span><span class="p">:</span>
+            <span class="n">letters</span> <span class="o">|=</span> <span class="n">TO_LOWER</span> <span class="o">|</span> <span class="n">LOWER</span>
+        <span class="k">elif</span> <span class="n">letter_case</span> <span class="o">==</span> <span class="s2">&quot;keep&quot;</span><span class="p">:</span>
+            <span class="n">letters</span> <span class="o">|=</span> <span class="n">LOWER</span> <span class="o">|</span> <span class="n">UPPER</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Unsupported letter case in verbatim verbalization: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">letter_case</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">insert_space</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">letters</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_verbatim</span>
+        <span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># collapse double spaces</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">graph</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cdrewrite</span><span class="p">(</span><span class="n">delete_extra_space</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">SIGMA</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">graph</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+<div class="viewcode-block" id="VerbatimFst.get_verbatim_verbalization"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.verbalize.VerbatimFst.html#en_us_normalization.production.verbalize.VerbatimFst.get_verbatim_verbalization">[docs]</a>    <span class="k">def</span> <span class="nf">get_verbatim_verbalization</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">letter_case</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;to_upper&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        getter for verbatim verbalizer to be reused in other transducers.</span>
+<span class="sd">        verbalizer inserts white space at the beginning.</span>
+<span class="sd">        for parameter description - see :py:func:`._build_verbatim_verbalization`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">letter_case</span> <span class="o">==</span> <span class="s2">&quot;to_upper&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbatim_spelling</span>
+        <span class="k">elif</span> <span class="n">letter_case</span> <span class="o">==</span> <span class="s2">&quot;to_lower&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbatim_pronunciation</span>
+        <span class="k">elif</span> <span class="n">letter_case</span> <span class="o">==</span> <span class="s2">&quot;keep&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbatim_as_is</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Unsupported letter case in verbatim verbalization: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">letter_case</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

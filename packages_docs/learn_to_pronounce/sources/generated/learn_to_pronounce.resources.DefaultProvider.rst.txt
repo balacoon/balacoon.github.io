@@ -1,0 +1,11 @@
+﻿learn\_to\_pronounce.resources.DefaultProvider
+==============================================
+
+.. currentmodule:: learn_to_pronounce.resources
+
+.. autoclass:: DefaultProvider
+    :members:
+
+    
+    .. automethod:: __init__
+    

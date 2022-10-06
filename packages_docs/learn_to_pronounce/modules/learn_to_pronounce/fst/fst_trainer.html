@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_pronounce.fst.fst_trainer &mdash; learn_to_pronounce 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
+        <script src="../../../static/jquery.js"></script>
+        <script src="../../../static/underscore.js"></script>
+        <script src="../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../static/doctools.js"></script>
+    <script src="../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> learn_to_pronounce
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">learn_to_pronounce</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>learn_to_pronounce.fst.fst_trainer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for learn_to_pronounce.fst.fst_trainer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+
+<span class="sd">trains FST - model to generation pronunciation or spelling</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">importlib.machinery</span> <span class="kn">import</span> <span class="n">SourceFileLoader</span>
+
+<span class="kn">from</span> <span class="nn">pronunciation_generation</span> <span class="kn">import</span> <span class="n">PronunciationDictionary</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_pronounce.fst.fst_evaluator</span> <span class="kn">import</span> <span class="n">FSTEvaluator</span>
+<span class="kn">from</span> <span class="nn">learn_to_pronounce.resources.provider</span> <span class="kn">import</span> <span class="n">AbstractProvider</span>
+
+
+<span class="k">def</span> <span class="nf">add_fst_arguments</span><span class="p">(</span><span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds special arguments specific to FST training into argument parsing</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parser: argparse.ArgumentParser</span>
+<span class="sd">        argument parser from recipe to add special arguments to</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">arg_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s2">&quot;fst&quot;</span><span class="p">)</span>
+    <span class="n">arg_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--fst-order&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum N-gram order to be used in FST&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">arg_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--fst-spelling-order&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Maximum N-gram order to be used in spelling FST&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="FSTTrainer"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.fst.FSTTrainer.html#learn_to_pronounce.fst.FSTTrainer">[docs]</a><span class="k">class</span> <span class="nc">FSTTrainer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trains FST based on provided lexicon. Training is done with phonetisaurus.</span>
+<span class="sd">    Can be used to train pronunciation or spelling generation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FSTTrainer.__init__"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.fst.FSTTrainer.html#learn_to_pronounce.fst.FSTTrainer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">provider</span><span class="p">:</span> <span class="n">AbstractProvider</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        constructor</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        provider: AbstractProvider</span>
+<span class="sd">            resources provider that is used to get specific lexicon for training</span>
+<span class="sd">        work_dir: str</span>
+<span class="sd">            directory where all intermediate artifacts are stored</span>
+<span class="sd">        args: argparse.Namespace</span>
+<span class="sd">            parsed arguments, containing arguments added in :func:`add_fst_arguments`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_provider</span> <span class="o">=</span> <span class="n">provider</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_work_dir</span> <span class="o">=</span> <span class="n">work_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_dump_fst_train_data</span><span class="p">(</span><span class="n">pd</span><span class="p">:</span> <span class="n">PronunciationDictionary</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function that stores pronunciation dictionary suitalbe for FST training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">words</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_words</span><span class="p">()</span>
+            <span class="c1"># order of words influences result!</span>
+            <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">()):</span>
+                <span class="k">for</span> <span class="n">pronunciation</span> <span class="ow">in</span> <span class="n">word</span><span class="o">.</span><span class="n">get_pronunciations</span><span class="p">():</span>
+                    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span> <span class="n">pronunciation</span><span class="o">.</span><span class="n">to_string</span><span class="p">()))</span>
+
+    <span class="k">def</span> <span class="nf">_train_fst</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">lexicon</span><span class="p">:</span> <span class="n">PronunciationDictionary</span><span class="p">,</span>
+        <span class="n">train_data_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ngram_order</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">phonetisaurus_args</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function that trains FST on the given lexicon</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lexicon: PronunciationDictionary</span>
+<span class="sd">            lexicon to train on</span>
+<span class="sd">        train_data_name: str</span>
+<span class="sd">            name to give to intermediate file with training data</span>
+<span class="sd">        model_name: str</span>
+<span class="sd">            name to give to file with trained model</span>
+<span class="sd">        ngram_order: int</span>
+<span class="sd">            maximum n-gram order to be used in the FST training.</span>
+<span class="sd">            Primary parameter that defines tradeoff between model size and accuracy.</span>
+<span class="sd">        **phonetisaurus_args:</span>
+<span class="sd">            other named parameters passed directly to phonetisaurus_train.G2PModelTrainer</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fst_path: str</span>
+<span class="sd">            path to trained FST model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">train_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_work_dir</span><span class="p">,</span> <span class="n">train_data_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_fst_train_data</span><span class="p">(</span><span class="n">lexicon</span><span class="p">,</span> <span class="n">train_data_path</span><span class="p">)</span>
+        <span class="n">phonetisaurus_train</span> <span class="o">=</span> <span class="n">SourceFileLoader</span><span class="p">(</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;/usr/local/bin/phonetisaurus-train&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">load_module</span><span class="p">()</span>
+        <span class="n">phonetisaurus_trainer</span> <span class="o">=</span> <span class="n">phonetisaurus_train</span><span class="o">.</span><span class="n">G2PModelTrainer</span><span class="p">(</span>
+            <span class="n">train_data_path</span><span class="p">,</span>
+            <span class="n">dir_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_work_dir</span><span class="p">,</span>
+            <span class="n">model_prefix</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
+            <span class="n">ngram_order</span><span class="o">=</span><span class="n">ngram_order</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">phonetisaurus_args</span>
+        <span class="p">)</span>
+        <span class="n">phonetisaurus_trainer</span><span class="o">.</span><span class="n">TrainG2PModel</span><span class="p">()</span>
+        <span class="n">fst_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_work_dir</span><span class="p">,</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s2">&quot;.fst&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fst_path</span>
+
+<div class="viewcode-block" id="FSTTrainer.train_pronunciation"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.fst.FSTTrainer.html#learn_to_pronounce.fst.FSTTrainer.train_pronunciation">[docs]</a>    <span class="k">def</span> <span class="nf">train_pronunciation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Training pronunciation FST</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fst_path: str</span>
+<span class="sd">            path to trained pronunciation model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">train_lexicon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_provider</span><span class="o">.</span><span class="n">get_lexicon</span><span class="p">(</span>
+            <span class="n">words</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_provider</span><span class="o">.</span><span class="n">get_train_words</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Training pronunciation FST on </span><span class="si">{}</span><span class="s2"> words&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">train_lexicon</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="n">fst_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_fst</span><span class="p">(</span>
+            <span class="n">train_lexicon</span><span class="p">,</span>
+            <span class="n">train_data_name</span><span class="o">=</span><span class="s2">&quot;pronunciation_training_data&quot;</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;pronunciation&quot;</span><span class="p">,</span>
+            <span class="n">ngram_order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="o">.</span><span class="n">fst_order</span><span class="p">,</span>
+            <span class="n">seq2_del</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">fst_path</span></div>
+
+    <span class="k">def</span> <span class="nf">evaluate_pronunciation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fst_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_work_dir</span><span class="p">,</span> <span class="s2">&quot;pronunciation.fst&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fst_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t run evalution, missing [</span><span class="si">{}</span><span class="s2">]. Run training first.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fst_path</span><span class="p">))</span>
+        <span class="n">test_words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_provider</span><span class="o">.</span><span class="n">get_test_words</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">test_words</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;FST evaluation is enabled, but there is no test words in resource directory&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">test_lexicon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_provider</span><span class="o">.</span><span class="n">get_lexicon</span><span class="p">(</span><span class="n">words</span><span class="o">=</span><span class="n">test_words</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Evaluating pronunciation FST on </span><span class="si">{}</span><span class="s2"> words&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">test_lexicon</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">FSTEvaluator</span><span class="p">(</span><span class="n">fst_path</span><span class="p">)</span>
+        <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">test_lexicon</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FSTTrainer.train_spelling"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.fst.FSTTrainer.html#learn_to_pronounce.fst.FSTTrainer.train_spelling">[docs]</a>    <span class="k">def</span> <span class="nf">train_spelling</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Training spelling FST</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fst_path: str</span>
+<span class="sd">            path to trained spelling model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spelling_lexicon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_provider</span><span class="o">.</span><span class="n">get_spelling_lexicon</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Training spelling FST on </span><span class="si">{}</span><span class="s2"> words&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spelling_lexicon</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="n">fst_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_fst</span><span class="p">(</span>
+            <span class="n">spelling_lexicon</span><span class="p">,</span>
+            <span class="n">train_data_name</span><span class="o">=</span><span class="s2">&quot;spelling_training_data&quot;</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;spelling&quot;</span><span class="p">,</span>
+            <span class="n">ngram_order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="o">.</span><span class="n">fst_spelling_order</span><span class="p">,</span>
+            <span class="n">seq2_del</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">fst_path</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

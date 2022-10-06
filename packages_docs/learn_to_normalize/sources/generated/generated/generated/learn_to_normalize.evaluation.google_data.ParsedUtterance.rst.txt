@@ -1,0 +1,11 @@
+learn\_to\_normalize.evaluation.google\_data.ParsedUtterance
+============================================================
+
+.. currentmodule:: learn_to_normalize.evaluation.google_data
+
+.. autoclass:: ParsedUtterance
+    :members:
+
+    
+    .. automethod:: __init__
+    

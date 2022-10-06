@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.classify.electronic &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../static/documentation_options.js"></script>
+        <script src="../../../../static/jquery.js"></script>
+        <script src="../../../../static/underscore.js"></script>
+        <script src="../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../static/doctools.js"></script>
+    <script src="../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>en_us_normalization.production.classify.electronic</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for en_us_normalization.production.classify.electronic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+<span class="sd">Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.</span>
+<span class="sd">Copyright 2015 and onwards Google, Inc.</span>
+
+<span class="sd">tokenize and classify electronic addresses</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.english_utils</span> <span class="kn">import</span> <span class="n">get_data_file_path</span>
+<span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.data_loader</span> <span class="kn">import</span> <span class="n">load_union</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">ALPHA</span><span class="p">,</span> <span class="n">CHAR</span><span class="p">,</span> <span class="n">DIGIT</span><span class="p">,</span> <span class="n">NOT_SPACE</span><span class="p">,</span> <span class="n">TO_UPPER</span><span class="p">,</span> <span class="n">NOT_PUNCT</span>
+
+
+<div class="viewcode-block" id="ElectronicFst"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.ElectronicFst.html#en_us_normalization.production.classify.ElectronicFst">[docs]</a><span class="k">class</span> <span class="nc">ElectronicFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finite state transducer for classifying electronic: as URLs, email addresses, etc.</span>
+<span class="sd">    Electronic semiotic class can contain multiple optional fields:</span>
+
+<span class="sd">    - protocol - in front of urls there can be a protocol, such as &quot;http://&quot; or &quot;mailto://&quot;</span>
+<span class="sd">    - username - before domain, there might be a used name, separated with &quot;@&quot;.</span>
+<span class="sd">      Most common case - username in email address, for ex &quot;clement@balacoon.com&quot;.</span>
+<span class="sd">      Within username there might be a password separated with a colon symbol, for ex. &quot;user:123@gmail.com&quot;</span>
+<span class="sd">    - domain - smth that goes after protocol and username. can represent the whole URL, the only non-optional</span>
+<span class="sd">      in electronic address. domain may have optional prefix, such as &quot;www.&quot; and mandatory suffix that helps</span>
+<span class="sd">      to identify domain. Suffixes are 2-3 letters long (such as &quot;com&quot; or &quot;io&quot;), can be repeated (for ex. &quot;com.ua&quot;)</span>
+<span class="sd">      and separated with a dot. Usually suffixes should be spelled in pronunciation, but in some cases,</span>
+<span class="sd">      they should be pronounced as a regular word (for ex. &quot;com&quot;).</span>
+<span class="sd">    - port - optional digits after domain separated with colon symbol, for ex. &quot;google.com:8080&quot;</span>
+<span class="sd">    - path - something that follow domain after a slash &quot;/&quot;. Could be any symbols.</span>
+
+<span class="sd">    Examples of strings that should be classified as electronic semiotic classes and their tagging:</span>
+
+<span class="sd">    - cdf1@abc.edu -&gt;</span>
+<span class="sd">      electronic { username: &quot;cdf1&quot; domain: &quot;abc.edu&quot; }</span>
+<span class="sd">    - http://cat:dog@www.google.com:8080/?231eds2@90iu -&gt;</span>
+<span class="sd">      electronic { protocol: &quot;http&quot; username: &quot;cat&quot; password: &quot;dog&quot; domain: &quot;www.google.com&quot;</span>
+<span class="sd">      port: &quot;8080&quot; path: &quot;/?231eds2@90iu&quot; }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ElectronicFst.__init__"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.ElectronicFst.html#en_us_normalization.production.classify.ElectronicFst.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;electronic&quot;</span><span class="p">)</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_protocol_fst</span><span class="p">()</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_username_fst</span><span class="p">()</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_domain_fst</span><span class="p">()</span>
+
+        <span class="c1"># options for domain:</span>
+        <span class="c1"># 1. protocol + user + domain &lt;&lt; should be more probable</span>
+        <span class="c1"># 2. user + domain &lt;&lt; should be less probable</span>
+        <span class="c1"># 3. protocol + domain</span>
+        <span class="c1"># 4. domain</span>
+        <span class="n">protocol_username_domain</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">protocol</span> <span class="o">+</span> <span class="n">username</span> <span class="o">+</span> <span class="n">domain</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
+            <span class="o">|</span> <span class="p">(</span><span class="n">protocol</span> <span class="o">+</span> <span class="n">domain</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">username</span> <span class="o">+</span> <span class="n">domain</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">domain</span>
+        <span class="p">)</span>
+
+        <span class="c1"># port is optional after domain</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">DIGIT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s1">&#39; port: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="n">protocol_username_domain_port</span> <span class="o">=</span> <span class="n">protocol_username_domain</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">port</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+        <span class="c1"># after domain there could be optional path</span>
+        <span class="c1"># should escape qoute so its parsed properly</span>
+        <span class="n">non_space_char</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">NOT_SPACE</span><span class="p">,</span> <span class="mf">1.01</span><span class="p">)</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\\\\\</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># should give up punctuation at the end to go to &quot;right_punct&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">non_space_char</span><span class="p">,</span> <span class="mf">1.01</span><span class="p">))</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">NOT_PUNCT</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39; path: &quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">path</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">protocol_username_domain_port_path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">protocol_username_domain_port</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">final_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_tokens</span><span class="p">(</span><span class="n">protocol_username_domain_port_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="n">final_graph</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_protocol_fst</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        helper function that composes fst that accepts electronic protocols, such as &quot;http://&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># read protocols from should be spelled out.</span>
+        <span class="c1"># they are converted to upper case to signalize that</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;electronic&quot;</span><span class="p">,</span> <span class="s2">&quot;protocols.tsv&quot;</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">protocols</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">protocols</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">TO_UPPER</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">protocols</span>
+        <span class="p">]</span>
+        <span class="n">protocols</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">protocols</span><span class="p">)</span>
+        <span class="n">spoken_protocols</span> <span class="o">=</span> <span class="n">load_union</span><span class="p">(</span>
+            <span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;electronic&quot;</span><span class="p">,</span> <span class="s2">&quot;spoken_protocols.tsv&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">protocols</span> <span class="o">|=</span> <span class="n">spoken_protocols</span>
+        <span class="n">remove_optional_slashes</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
+        <span class="n">protocols</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;protocol: &quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">protocols</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot; &#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">remove_optional_slashes</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">protocols</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_username_fst</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        helper function that composes fst to accept username in electronic addresses.</span>
+<span class="sd">        optional field after protocol and before domain separated with &quot;@&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">alpha_or_digit</span> <span class="o">=</span> <span class="n">ALPHA</span> <span class="o">|</span> <span class="n">DIGIT</span>
+        <span class="n">accepted_symbols</span> <span class="o">=</span> <span class="n">load_union</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;symbols.tsv&quot;</span><span class="p">),</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">except_symbols</span> <span class="o">=</span> <span class="s2">&quot;/</span><span class="se">\\</span><span class="s2">:&quot;</span>
+        <span class="n">except_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">except_symbols</span><span class="p">]</span>
+        <span class="n">except_symbols</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">except_symbols</span><span class="p">)</span>
+        <span class="n">accepted_symbols</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">accepted_symbols</span><span class="p">,</span> <span class="n">except_symbols</span><span class="p">)</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="c1"># alpha characters, digits and limited set of symbols can appear in name</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">alpha_or_digit</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">alpha_or_digit</span> <span class="o">|</span> <span class="n">accepted_symbols</span><span class="p">)</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;username: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">username</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="c1"># password is optional part of username</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s1">&#39; password: &quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">CHAR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">password</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">username</span> <span class="o">+</span> <span class="n">password</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">username</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_domain_fst</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        helper function that composes fst to accept domains.</span>
+<span class="sd">        domain can be recognized by suffix, such as &quot;edu&quot; or &quot;com.ua&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">alpha_or_digit</span> <span class="o">=</span> <span class="n">ALPHA</span> <span class="o">|</span> <span class="n">DIGIT</span>
+        <span class="c1"># domain name [a-z][0-9]\-</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">alpha_or_digit</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">alpha_or_digit</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span>
+        <span class="c1"># domain prefix, i.e. www.</span>
+        <span class="n">domain_prefix</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;www.&quot;</span><span class="p">,</span> <span class="s2">&quot;WWW.&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="mf">1.1</span>
+        <span class="p">)</span>
+        <span class="c1"># domain suffix has at least two letters, i.e. &quot;com.ua&quot; or &quot;eu&quot;</span>
+        <span class="n">domain_suffix</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">ALPHA</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">TO_UPPER</span><span class="p">),</span> <span class="mf">1.1</span>
+        <span class="p">)</span>
+        <span class="n">domain_suffix</span> <span class="o">|=</span> <span class="n">load_union</span><span class="p">(</span>
+            <span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;electronic&quot;</span><span class="p">,</span> <span class="s2">&quot;spoken_domains.tsv&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">domain_suffix</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">domain_suffix</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">domain_prefix</span> <span class="o">+</span> <span class="n">domain</span> <span class="o">+</span> <span class="n">domain_suffix</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;domain: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">domain</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">domain</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

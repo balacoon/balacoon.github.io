@@ -1,0 +1,11 @@
+﻿learn\_to\_normalize.grammar\_utils.BaseFst
+===========================================
+
+.. currentmodule:: learn_to_normalize.grammar_utils
+
+.. autoclass:: BaseFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

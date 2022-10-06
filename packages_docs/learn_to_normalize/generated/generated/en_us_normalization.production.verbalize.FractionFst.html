@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.verbalize.FractionFst &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../static/documentation_options.js"></script>
+        <script src="../../static/jquery.js"></script>
+        <script src="../../static/underscore.js"></script>
+        <script src="../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../static/doctools.js"></script>
+    <script src="../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="en_us_normalization.production.verbalize.RomanFst" href="en_us_normalization.production.verbalize.RomanFst.html" />
+    <link rel="prev" title="en_us_normalization.production.verbalize.DecimalFst" href="en_us_normalization.production.verbalize.DecimalFst.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../grammars.html">Grammars</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../en_us_normalization.production.html">en_us_normalization.production</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../en_us_normalization.production.html#classification">Classification</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../en_us_normalization.production.html#verbalization">Verbalization</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../en_us_normalization.production.html#verbalization-rules">Verbalization rules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../grammars.html">Grammars</a> &raquo;</li>
+          <li><a href="../en_us_normalization.production.html">en_us_normalization.production</a> &raquo;</li>
+      <li>en_us_normalization.production.verbalize.FractionFst</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../sources/generated/generated/en_us_normalization.production.verbalize.FractionFst.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="en-us-normalization-production-verbalize-fractionfst">
+<h1>en_us_normalization.production.verbalize.FractionFst<a class="headerlink" href="#en-us-normalization-production-verbalize-fractionfst" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="en_us_normalization.production.verbalize.FractionFst">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">en_us_normalization.production.verbalize.</span></span><span class="sig-name descname"><span class="pre">FractionFst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cardinal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="en_us_normalization.production.verbalize.CardinalFst.html#en_us_normalization.production.verbalize.CardinalFst" title="en_us_normalization.production.verbalize.cardinal.CardinalFst"><span class="pre">CardinalFst</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordinal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="en_us_normalization.production.verbalize.OrdinalFst.html#en_us_normalization.production.verbalize.OrdinalFst" title="en_us_normalization.production.verbalize.ordinal.OrdinalFst"><span class="pre">OrdinalFst</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../modules/en_us_normalization/production/verbalize/fraction.html#FractionFst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#en_us_normalization.production.verbalize.FractionFst" title="Permalink to this definition"></a></dt>
+<dd><p>Finite state transducer for verbalizing fraction.
+Fraction consists of integer part, numerator and denominator.
+To expand integer part and numerator - cardinal transducer is reused.
+For denominator of the fraction however - ordinal transducer is needed.</p>
+<p>There are few exception, when fraction (both numerator and denominator) is
+expanded as one word (for ex. 1/2 -&gt; half)</p>
+<p>Also some denominators (2, 3, 4) require custom expansion (halves, thirds, quarters).</p>
+<p>When either numerator or denominator are “1” - this is also a special cases
+that has to be handled explicitly.</p>
+<p>Examples of input/output strings:</p>
+<ul class="simple">
+<li><p>fraction|integer_part:23|numerator:4|denominator:5| -&gt; twenty three and four fifths</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="en_us_normalization.production.verbalize.FractionFst.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cardinal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="en_us_normalization.production.verbalize.CardinalFst.html#en_us_normalization.production.verbalize.CardinalFst" title="en_us_normalization.production.verbalize.cardinal.CardinalFst"><span class="pre">CardinalFst</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordinal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="en_us_normalization.production.verbalize.OrdinalFst.html#en_us_normalization.production.verbalize.OrdinalFst" title="en_us_normalization.production.verbalize.ordinal.OrdinalFst"><span class="pre">OrdinalFst</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../modules/en_us_normalization/production/verbalize/fraction.html#FractionFst.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#en_us_normalization.production.verbalize.FractionFst.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="en_us_normalization.production.verbalize.FractionFst.get_graph">
+<span class="sig-name descname"><span class="pre">get_graph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../modules/en_us_normalization/production/verbalize/fraction.html#FractionFst.get_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#en_us_normalization.production.verbalize.FractionFst.get_graph" title="Permalink to this definition"></a></dt>
+<dd><p>helper function that returns the whole fraction verbalization graph
+without token name deletion. this is needed if the whole fraction
+graph is reused in another semiotic class (for ex. measure)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="en_us_normalization.production.verbalize.DecimalFst.html" class="btn btn-neutral float-left" title="en_us_normalization.production.verbalize.DecimalFst" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="en_us_normalization.production.verbalize.RomanFst.html" class="btn btn-neutral float-right" title="en_us_normalization.production.verbalize.RomanFst" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

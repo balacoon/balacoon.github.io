@@ -1,0 +1,23 @@
+main:
+  - title: "Use"
+    url: /use/
+  - title: "Demo"
+    url: /demo/
+  - title: "Posts"
+    url: /posts/
+
+sidebar-use:
+  - title: "TTS"
+    url: /use/tts
+  - title: "Frontend"
+    children:
+      - title: "Text processing in TTS"
+        url: /use/frontend
+      - title: "Adjusting pronunciation"
+        url: /use/frontend/learn_to_pronounce
+      - title: "Adjusting text normalization"
+        url: /use/frontend/learn_to_normalize
+  - title: "Backend"
+    children:
+      - title: "Vocoding"
+        url: /use/backend/vocoding

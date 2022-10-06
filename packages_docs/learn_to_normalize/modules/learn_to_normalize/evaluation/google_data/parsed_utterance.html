@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_normalize.evaluation.google_data.parsed_utterance &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../static/documentation_options.js"></script>
+        <script src="../../../../static/jquery.js"></script>
+        <script src="../../../../static/underscore.js"></script>
+        <script src="../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../static/doctools.js"></script>
+    <script src="../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>learn_to_normalize.evaluation.google_data.parsed_utterance</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for learn_to_normalize.evaluation.google_data.parsed_utterance</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+
+<span class="sd">a holder for tokens that are getting parsed</span>
+<span class="sd">from a google data file.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">unidecode</span>
+
+
+<div class="viewcode-block" id="ParsedUtterance"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance">[docs]</a><span class="k">class</span> <span class="nc">ParsedUtterance</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A data structure that contains unnormalized and normalized tokens</span>
+<span class="sd">    parsed from a Google data file. This class also contains</span>
+<span class="sd">    knowledge how google data conventions map to Balacoon text_normalization formats.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ParsedUtterance.__init__"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unnormalized</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_first_qoute</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_strip_letter_suffix</span><span class="p">(</span><span class="n">normalized</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ELECTRONIC semiotic class has fields being</span>
+<span class="sd">        spelled letter by letter, where each character</span>
+<span class="sd">        gets special &quot;_letter&quot; suffix. This is a helper</span>
+<span class="sd">        method to collapse that suffix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;_letter&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">normalized</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">normalized</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">normalized</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">new_parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cur_word</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_letter&quot;</span><span class="p">):</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;_letter&quot;</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="n">p</span><span class="p">:</span>
+                    <span class="n">cur_word</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+                <span class="k">elif</span> <span class="n">cur_word</span><span class="p">:</span>
+                    <span class="c1"># its just suffix. indicates whitespace</span>
+                    <span class="n">new_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cur_word</span><span class="p">))</span>
+                    <span class="n">cur_word</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cur_word</span><span class="p">:</span>
+                    <span class="n">new_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cur_word</span><span class="p">))</span>
+                    <span class="n">cur_word</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">new_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cur_word</span><span class="p">:</span>
+            <span class="n">new_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cur_word</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new_parts</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParsedUtterance.add_token"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance.add_token">[docs]</a>    <span class="k">def</span> <span class="nf">add_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unnormalized</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">normalized</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        once a line from data file is read, add that info into</span>
+<span class="sd">        currently parsed utterance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="c1"># most of the work is to handle punctiation marks. need to attach them properly</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;PUNCT&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unnormalized</span> <span class="ow">or</span> <span class="n">unnormalized</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;(&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="s2">&quot;[&quot;</span><span class="p">]:</span>
+                <span class="c1"># if there is no previous token or its an opening bracket,</span>
+                <span class="c1"># then its should be attached to the next token</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span> <span class="o">+=</span> <span class="n">unnormalized</span>
+            <span class="k">elif</span> <span class="n">unnormalized</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">:</span>
+                <span class="c1"># handling a qoute trying to track if its an opening or a closing one</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_first_qoute</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_is_first_qoute</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span> <span class="o">+=</span> <span class="n">unnormalized</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_unnormalized</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unnormalized</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">unnormalized</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_is_first_qoute</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># other punctuation marks are just attached to the previous token</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span><span class="p">:</span>
+                    <span class="c1"># there is some prefix but no actual token was found</span>
+                    <span class="n">unnormalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span> <span class="o">+</span> <span class="n">unnormalized</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_unnormalized</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unnormalized</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">unnormalized</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># this is non punct semiotic class</span>
+            <span class="k">if</span> <span class="n">normalized</span> <span class="o">==</span> <span class="s2">&quot;&lt;self&gt;&quot;</span><span class="p">:</span>
+                <span class="n">normalized</span> <span class="o">=</span> <span class="n">unnormalized</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;LETTERS&quot;</span><span class="p">:</span>
+                <span class="n">normalized</span> <span class="o">=</span> <span class="n">normalized</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;VERBATIM&quot;</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;[a-z]( [a-z])+&quot;</span><span class="p">,</span> <span class="n">normalized</span><span class="p">):</span>
+                <span class="c1"># its an abbreviation</span>
+                <span class="n">normalized</span> <span class="o">=</span> <span class="n">normalized</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="c1"># replace all non-ascii characters if any</span>
+            <span class="n">normalized</span> <span class="o">=</span> <span class="n">unidecode</span><span class="o">.</span><span class="n">unidecode</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+            <span class="c1"># strip all &quot;_letter&quot; suffixes if any</span>
+            <span class="n">normalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip_letter_suffix</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">normalized</span> <span class="ow">and</span> <span class="n">normalized</span> <span class="o">!=</span> <span class="s2">&quot;sil&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span><span class="p">:</span>
+                <span class="c1"># there is some prefix but no actual token was found</span>
+                <span class="n">unnormalized</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span> <span class="o">+</span> <span class="n">unnormalized</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_next_token_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unnormalized</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unnormalized</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParsedUtterance.has_semiotic_class"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance.has_semiotic_class">[docs]</a>    <span class="k">def</span> <span class="nf">has_semiotic_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        checks if this utterance has particular semiotic class</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tag: str</span>
+<span class="sd">            semiotic class to look for</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        flag: bool</span>
+<span class="sd">            True if this utterance has requested semiotic class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span></div>
+
+<div class="viewcode-block" id="ParsedUtterance.get_unnormalized"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance.get_unnormalized">[docs]</a>    <span class="k">def</span> <span class="nf">get_unnormalized</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        getter to return unnomralized utterance as a single string</span>
+<span class="sd">        concatenates previously accumulated unnormalized tokens</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        unnorm: str</span>
+<span class="sd">            string with unnormalized utterance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unnorm</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unnormalized</span><span class="p">)</span>
+        <span class="c1"># remove space after slash if any</span>
+        <span class="n">unnorm</span> <span class="o">=</span> <span class="n">unnorm</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/ &quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">unnorm</span></div>
+
+<div class="viewcode-block" id="ParsedUtterance.get_normalized"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance.get_normalized">[docs]</a>    <span class="k">def</span> <span class="nf">get_normalized</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        getter to return normalized utterance as a single string.</span>
+<span class="sd">        essentially a ground truth for text normalization.</span>
+<span class="sd">        concatenates previously accumulated normalized tokens</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        norm: str</span>
+<span class="sd">            string with normalized utterance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParsedUtterance.get_tokens_num"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance.get_tokens_num">[docs]</a>    <span class="k">def</span> <span class="nf">get_tokens_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        getter that returns number of tokens that were added to this utterance</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        num: int</span>
+<span class="sd">            number of tokens added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tags</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParsedUtterance.is_empty"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        checks if any tokens where added to the utterance</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        flag: bool</span>
+<span class="sd">            True if no tokens where added to this utterance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tokens_num</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_pronounce.phonetics.arpabet_convertor &mdash; learn_to_pronounce 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
+        <script src="../../../static/jquery.js"></script>
+        <script src="../../../static/underscore.js"></script>
+        <script src="../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../static/doctools.js"></script>
+    <script src="../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> learn_to_pronounce
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">learn_to_pronounce</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>learn_to_pronounce.phonetics.arpabet_convertor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for learn_to_pronounce.phonetics.arpabet_convertor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+
+<span class="sd">Convertor from ARPABet to IPA or X-SAMPA</span>
+<span class="sd">TODO: Move conversion between phoneme sets to pronunciation_generation package</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+
+<div class="viewcode-block" id="ARPAbetConvertor"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.phonetics.ARPAbetConvertor.html#learn_to_pronounce.phonetics.ARPAbetConvertor">[docs]</a><span class="k">class</span> <span class="nc">ARPAbetConvertor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts ARPAbet (phonemeset of CMUDict) to more universal IPA or X-SAMPA.</span>
+<span class="sd">    X-SAMPA - is unicode-friendly version of IPA (international pronunciation alphabet).</span>
+<span class="sd">    ARPAbet: https://en.wikipedia.org/wiki/ARPABET</span>
+<span class="sd">    IPA: https://en.wikipedia.org/wiki/International_Phonetic_Alphabet</span>
+<span class="sd">    X-SAMPA: https://en.wikipedia.org/wiki/X-SAMPA</span>
+<span class="sd">    Conversion notes: https://github.com/menelik3/cmudict-ipa, https://github.com/Epicalert/xsampadict.</span>
+<span class="sd">    One modification to IPA/XSAMPA notation: stress marks are put just before vowel, not before syllable.</span>
+<span class="sd">    That helps to treat stressed/unstressed vowels as separate phonemes for g2p training/forced alignment purposes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ARPAbetConvertor.__init__"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.phonetics.ARPAbetConvertor.html#learn_to_pronounce.phonetics.ARPAbetConvertor.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># https://github.com/menelik3/cmudict-ipa/issues/2</span>
+        <span class="c1"># https://github.com/danmysak/multilingual-ipa-data/blob/main/cmudict/collection/data/phonemes</span>
+        <span class="c1"># exceptions from https://github.com/menelik3/cmudict-ipa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arpa2ipa</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;AA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɑ:&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;AE&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;æ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;AH0&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ə&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;AH2&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ə&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;AH1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ʌ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;AO&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɔ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;AW&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;ʊ̯&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;AY&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;ɪ̯&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;CH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;ʃ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;D&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;d&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;DH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ð&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;EH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɛ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;ER0&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɚ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;ER&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɝ:&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;EY&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="s2">&quot;ɪ̯&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;F&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;f&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɡ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;HH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;IH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɪ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;IY&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;i:&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;JH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;ʒ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;L&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;l&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;M&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;NG&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ŋ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;OW&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;ʊ̯&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;OY&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɔ&quot;</span><span class="p">,</span> <span class="s2">&quot;ɪ̯&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;P&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;R&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ɹ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;SH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ʃ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;TH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;θ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;UH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ʊ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;UW&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;u:&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;V&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;W&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;Y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;j&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;ZH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ʒ&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;&lt;eps&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;eps&gt;&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arpa2ipa_stress</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;ˈ&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;ˌ&quot;</span><span class="p">}</span>
+
+        <span class="c1"># https://en.wikipedia.org/wiki/X-SAMPA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ipa2xsampa</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;ɑ&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ɪ̯&quot;</span><span class="p">:</span> <span class="s2">&quot;I&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;æ&quot;</span><span class="p">:</span> <span class="s2">&quot;{&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ʌ&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ə&quot;</span><span class="p">:</span> <span class="s2">&quot;@&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ɔ&quot;</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ʊ̯&quot;</span><span class="p">:</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ɪ&quot;</span><span class="p">:</span> <span class="s2">&quot;I&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ʃ&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ð&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ɛ&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ɚ&quot;</span><span class="p">:</span> <span class="s2">&quot;@`&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ɝ&quot;</span><span class="p">:</span> <span class="s2">&quot;@`&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;f&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ɡ&quot;</span><span class="p">:</span> <span class="s2">&quot;g&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;h&quot;</span><span class="p">:</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="s2">&quot;i&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ʒ&quot;</span><span class="p">:</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="s2">&quot;l&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="s2">&quot;n&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ŋ&quot;</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;o&quot;</span><span class="p">:</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ɹ&quot;</span><span class="p">:</span> <span class="s2">&quot;r</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;θ&quot;</span><span class="p">:</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="s2">&quot;u&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ʊ&quot;</span><span class="p">:</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;w&quot;</span><span class="p">:</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="s2">&quot;j&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;eps&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;eps&gt;&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ipa2xsampa_stress</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ˈ&quot;</span><span class="p">:</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;ˌ&quot;</span><span class="p">:</span> <span class="s2">&quot;%&quot;</span><span class="p">}</span></div>
+
+    <span class="k">def</span> <span class="nf">arpa2ipa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arpa_phonemes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">ipa_phonemes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arpa_phonemes</span><span class="p">:</span>
+            <span class="c1"># check if its already there without removing a stress</span>
+            <span class="n">ipa_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arpa2ipa</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># convert stress to ipa if any</span>
+            <span class="n">ipa_stress</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="n">ipa_stress</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arpa2ipa_stress</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># if ipa phoneme was not found, look up for phoneme without stress (should be there)</span>
+            <span class="k">if</span> <span class="n">ipa_x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arpa2ipa</span>
+                <span class="p">),</span> <span class="s2">&quot;Cant find [</span><span class="si">{}</span><span class="s2">] in ARPAbet to IPA mapping&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">ipa_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arpa2ipa</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+
+            <span class="c1"># add ipa version of stress</span>
+            <span class="n">ipa_x</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ipa_x</span><span class="p">)</span>
+            <span class="n">ipa_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ipa_stress</span> <span class="o">+</span> <span class="n">ipa_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ipa_phonemes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ipa_x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ipa_phonemes</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_ascii</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">s</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">ipa2xsampa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipa_phonemes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">xsampa_phonemes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ipa_phonemes</span><span class="p">:</span>
+
+            <span class="c1"># convert stress if any</span>
+            <span class="n">xsampa_stress</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ipa2xsampa_stress</span><span class="p">:</span>
+                <span class="n">xsampa_stress</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ipa2xsampa_stress</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># transfer prolongation</span>
+            <span class="n">xsampa_prolongation</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;:&quot;</span><span class="p">:</span>
+                <span class="n">xsampa_prolongation</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># convert ipa to xsampa</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ipa2xsampa</span>
+            <span class="p">),</span> <span class="s2">&quot;Cant find [</span><span class="si">{}</span><span class="s2">] in IPA to X-SAMPA mapping&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">xsampa_x</span> <span class="o">=</span> <span class="n">xsampa_stress</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ipa2xsampa</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="n">xsampa_prolongation</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ascii</span><span class="p">(</span><span class="n">xsampa_x</span><span class="p">),</span> <span class="s2">&quot;X-SAMPA phoneme is non-ASCII: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">xsampa_x</span>
+            <span class="p">)</span>
+            <span class="n">xsampa_phonemes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xsampa_x</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">xsampa_phonemes</span>
+
+    <span class="k">def</span> <span class="nf">arpa2xsampa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arpa_phonemes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">ipa_phonemes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arpa2ipa</span><span class="p">(</span><span class="n">arpa_phonemes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipa2xsampa</span><span class="p">(</span><span class="n">ipa_phonemes</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

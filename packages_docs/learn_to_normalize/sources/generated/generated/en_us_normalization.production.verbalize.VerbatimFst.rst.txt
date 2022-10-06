@@ -1,0 +1,11 @@
+en\_us\_normalization.production.verbalize.VerbatimFst
+======================================================
+
+.. currentmodule:: en_us_normalization.production.verbalize
+
+.. autoclass:: VerbatimFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

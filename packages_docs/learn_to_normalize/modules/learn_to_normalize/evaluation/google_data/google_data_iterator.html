@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_normalize.evaluation.google_data.google_data_iterator &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../static/documentation_options.js"></script>
+        <script src="../../../../static/jquery.js"></script>
+        <script src="../../../../static/underscore.js"></script>
+        <script src="../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../static/doctools.js"></script>
+    <script src="../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>learn_to_normalize.evaluation.google_data.google_data_iterator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for learn_to_normalize.evaluation.google_data.google_data_iterator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+
+<span class="sd">Iterates over google dataset.</span>
+<span class="sd">Format is token per line, so some logic to merge utterances is required.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.evaluation.data_iterator</span> <span class="kn">import</span> <span class="n">DataIterator</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.evaluation.google_data.parsed_utterance</span> <span class="kn">import</span> <span class="n">ParsedUtterance</span>
+
+
+<div class="viewcode-block" id="GoogleDataIterator"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.GoogleDataIterator.html#learn_to_normalize.evaluation.google_data.GoogleDataIterator">[docs]</a><span class="k">class</span> <span class="nc">GoogleDataIterator</span><span class="p">(</span><span class="n">DataIterator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data iterator over Google text normalization data</span>
+<span class="sd">    (https://www.kaggle.com/datasets/richardwilliamsproat/text-normalization-for-english-russian-and-polish).</span>
+<span class="sd">    Unpacked data contains multiple text files with one token per line, that looks like that:</span>
+
+<span class="sd">    ::</span>
+
+<span class="sd">        PLAIN	Brillantaisia	&lt;self&gt;</span>
+<span class="sd">        PLAIN	is	&lt;self&gt;</span>
+<span class="sd">        PLAIN	a	&lt;self&gt;</span>
+<span class="sd">        PLAIN	genus	&lt;self&gt;</span>
+<span class="sd">        PLAIN	of	&lt;self&gt;</span>
+<span class="sd">        PLAIN	plant	&lt;self&gt;</span>
+<span class="sd">        PLAIN	in	&lt;self&gt;</span>
+<span class="sd">        PLAIN	family	&lt;self&gt;</span>
+<span class="sd">        PLAIN	Acanthaceae	&lt;self&gt;</span>
+<span class="sd">        PUNCT	.	sil</span>
+<span class="sd">        &lt;eos&gt;	&lt;eos&gt;</span>
+
+<span class="sd">    Data iterator parses those data files and composes pairs of unnomralized/normalized utterances.</span>
+<span class="sd">    It needs to tackle punctuation marks and spelling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">GOOGLE_SEMIOTIC_CLASSES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ADDRESS&quot;</span><span class="p">,</span> <span class="s2">&quot;CARDINAL&quot;</span><span class="p">,</span> <span class="s2">&quot;DATE&quot;</span><span class="p">,</span> <span class="s2">&quot;DECIMAL&quot;</span><span class="p">,</span> <span class="s2">&quot;DIGIT&quot;</span><span class="p">,</span> <span class="s2">&quot;ELECTRONIC&quot;</span><span class="p">,</span> <span class="s2">&quot;FRACTION&quot;</span><span class="p">,</span>
+                               <span class="s2">&quot;LETTERS&quot;</span><span class="p">,</span> <span class="s2">&quot;MEASURE&quot;</span><span class="p">,</span> <span class="s2">&quot;MONEY&quot;</span><span class="p">,</span> <span class="s2">&quot;ORDINAL&quot;</span><span class="p">,</span> <span class="s2">&quot;TELEPHONE&quot;</span><span class="p">,</span> <span class="s2">&quot;TIME&quot;</span><span class="p">,</span> <span class="s2">&quot;VERBATIM&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="GoogleDataIterator.__init__"><a class="viewcode-back" href="../../../../generated/generated/generated/learn_to_normalize.evaluation.google_data.GoogleDataIterator.html#learn_to_normalize.evaluation.google_data.GoogleDataIterator.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subset</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">n_utterances</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        constructor of google data iterator</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        location: str</span>
+<span class="sd">            directory with the data, for ex. downloaded and unpacked</span>
+<span class="sd">            https://storage.googleapis.com/kaggle-data-sets/869240/1481083/compressed/en_with_types.tgz.zip</span>
+<span class="sd">        subset: str</span>
+<span class="sd">            subset of the data to iterate over. supported values:</span>
+
+<span class="sd">            - `test` - conventional test set of google dataset.</span>
+<span class="sd">               For english its first 100002 tokens of output-00099-of-00100</span>
+<span class="sd">            - `all` - iterate over all the data</span>
+<span class="sd">            - `ADDRESS`, `CARDINAL`, ... - selects utterances with specific semiotic class present</span>
+
+<span class="sd">        n_utterances: int</span>
+<span class="sd">            number of utterances to read from subset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># find data files to read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_files</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of data files to read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_file_idx</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># which data file is currently parsed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_tokens</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># max number of tokens to read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_utterances</span> <span class="o">=</span> <span class="n">n_utterances</span>  <span class="c1"># max number of utterances to read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expected_semiotic</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># which semiotic class to pick</span>
+        <span class="k">if</span> <span class="n">subset</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
+            <span class="n">test_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s2">&quot;output-00099-of-00100&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">test_file</span><span class="p">),</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not in </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">test_file</span><span class="p">,</span> <span class="n">location</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">test_file</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_tokens</span> <span class="o">=</span> <span class="mi">100002</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_utterances</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;For `test` subset processing first </span><span class="si">{}</span><span class="s2"> tokens from </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_tokens</span><span class="p">,</span> <span class="n">test_file</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">subset</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="n">subset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GOOGLE_SEMIOTIC_CLASSES</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">subset</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+                <span class="c1"># subset specifies which semiotic class to preselect</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_expected_semiotic</span> <span class="o">=</span> <span class="n">subset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> subset is not supported by google data iterator. &quot;</span>
+                               <span class="s2">&quot;Use test/toy/all or any from </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GOOGLE_SEMIOTIC_CLASSES</span><span class="p">)))</span>
+
+        <span class="c1"># set up class members that track current state of reading data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_data_file</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># data file from which we currently read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processed_tokens</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># how many tokens we already processed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processed_utterances</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># how many utterances we already processed</span></div>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset iterating through data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_file_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processed_tokens</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processed_utterances</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_raise_stop_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function that prints some stats and raises</span>
+<span class="sd">        StopIteration to exit __next__</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processed </span><span class="si">{}</span><span class="s2"> utterances with </span><span class="si">{}</span><span class="s2"> tokens&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_processed_utterances</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processed_tokens</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+    <span class="k">def</span> <span class="nf">_get_utterance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        helper function that attempts to read a single utterance from a data file.</span>
+<span class="sd">        it reads lines before it finds &quot;&lt;eos&gt;&quot;.</span>
+<span class="sd">        it also manages the end of file, switching to read next file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_data_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># need to open file to read</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_file_idx</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_files</span><span class="p">):</span>
+                <span class="c1"># reached the end, no more data files to iterate over</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_raise_stop_iteration</span><span class="p">()</span>
+            <span class="n">data_file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_files</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_file_idx</span><span class="p">]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Opening </span><span class="si">{}</span><span class="s2"> for parsing&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_file_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_data_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">utterance</span> <span class="o">=</span> <span class="n">ParsedUtterance</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_data_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;eos&gt;&quot;</span><span class="p">):</span>
+                <span class="c1"># found end of utterance, process what was read before</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                <span class="c1"># reached end of file</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_file_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_data_file</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">break</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t parse [</span><span class="si">{}</span><span class="s2">] from </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_files</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_file_idx</span><span class="p">]))</span>
+            <span class="n">utterance</span><span class="o">.</span><span class="n">add_token</span><span class="p">(</span><span class="o">*</span><span class="n">parts</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">utterance</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="c1"># nothing was read from this file, attempt again recursively</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_utterance</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected_semiotic</span> <span class="ow">and</span> <span class="n">utterance</span><span class="o">.</span><span class="n">has_semiotic_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expected_semiotic</span><span class="p">):</span>
+                <span class="c1"># current line doesn&#39;t have a semiotic class of interest, skip</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_utterance</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># get what was accumulated</span>
+                <span class="n">unnorm</span><span class="p">,</span> <span class="n">norm</span> <span class="o">=</span> <span class="n">utterance</span><span class="o">.</span><span class="n">get_unnormalized</span><span class="p">(),</span> <span class="n">utterance</span><span class="o">.</span><span class="n">get_normalized</span><span class="p">()</span>
+                <span class="c1"># quick sanity check to confirm that utterance parsed properly</span>
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^[A-Za-z-&#39; ]+$&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_processed_tokens</span> <span class="o">+=</span> <span class="n">utterance</span><span class="o">.</span><span class="n">get_tokens_num</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_processed_utterances</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">return</span> <span class="n">unnorm</span><span class="p">,</span> <span class="n">norm</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># probably failed to parse</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Failed to parse utterance from </span><span class="si">{}</span><span class="s2">. &quot;</span>
+                                    <span class="s2">&quot;Normalized utterance [</span><span class="si">{}</span><span class="s2">] contains unusual characters. &quot;</span>
+                                    <span class="s2">&quot;Original utterance: [</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_data_files</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_file_idx</span><span class="p">],</span> <span class="n">norm</span><span class="p">,</span> <span class="n">unnorm</span><span class="p">))</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_utterance</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over the google text normalization data</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        utterance: Tuple[str, str]</span>
+<span class="sd">            pair of strings which represent single utterance.</span>
+<span class="sd">            specifically it is unnormalized and normalized versions</span>
+<span class="sd">            of the utterance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enough_tokens</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_tokens</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processed_tokens</span>
+        <span class="n">enough_utterances</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_utterances</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processed_utterances</span>
+        <span class="k">if</span> <span class="n">enough_tokens</span> <span class="ow">or</span> <span class="n">enough_utterances</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_stop_iteration</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_utterance</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

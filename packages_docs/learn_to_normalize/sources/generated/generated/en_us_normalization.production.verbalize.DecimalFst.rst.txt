@@ -1,0 +1,11 @@
+en\_us\_normalization.production.verbalize.DecimalFst
+=====================================================
+
+.. currentmodule:: en_us_normalization.production.verbalize
+
+.. autoclass:: DecimalFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.classify.abbreviation &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../static/documentation_options.js"></script>
+        <script src="../../../../static/jquery.js"></script>
+        <script src="../../../../static/underscore.js"></script>
+        <script src="../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../static/doctools.js"></script>
+    <script src="../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>en_us_normalization.production.classify.abbreviation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for en_us_normalization.production.classify.abbreviation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright Balacoon 2022</span>
+<span class="sd">Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.</span>
+<span class="sd">Copyright 2015 and onwards Google, Inc.</span>
+
+<span class="sd">tokenizes and classifies abbreviations</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.english_utils</span> <span class="kn">import</span> <span class="n">get_data_file_path</span>
+<span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.data_loader</span> <span class="kn">import</span> <span class="n">load_csv</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">LOWER</span><span class="p">,</span> <span class="n">TO_LOWER</span><span class="p">,</span> <span class="n">TO_UPPER</span><span class="p">,</span> <span class="n">UPPER</span>
+
+
+<span class="k">class</span> <span class="nc">LettersSequence</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper transducer which defines sequence of letters (upper or lower case),</span>
+<span class="sd">    when all elements of that sequence are vowels or consonants</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># not including y.</span>
+    <span class="c1"># it is consonant, but it may act as vowel, for ex.: &quot;my&quot;, &quot;by&quot;</span>
+    <span class="n">CONSONANTS</span> <span class="o">=</span> <span class="s2">&quot;bcdfghjklmnpqrstvwxz&quot;</span>
+    <span class="n">VOWELS</span> <span class="o">=</span> <span class="s2">&quot;aeiou&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uppercase_vowels_fst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uppercase_letters_acceptor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VOWELS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lowercase_vowels_fst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowercase_letters_acceptor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VOWELS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consonants_fst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">letters_acceptor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CONSONANTS</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">lowercase_letters_acceptor</span><span class="p">(</span><span class="n">letters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        accepts all the letters from the list as lowercase and converts them to upper</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">TO_UPPER</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">letters</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">uppercase_letters_acceptor</span><span class="p">(</span><span class="n">letters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        accepts all the letters from the list as uppercase</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">letters</span><span class="p">])</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">letters_acceptor</span><span class="p">(</span><span class="n">letters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Accepts either lowercase or uppercase letters from the list, where lower case letters are converted to</span>
+<span class="sd">        upper, uppers are left intact</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">LettersSequence</span><span class="o">.</span><span class="n">lowercase_letters_acceptor</span><span class="p">(</span>
+            <span class="n">letters</span>
+        <span class="p">)</span> <span class="o">|</span> <span class="n">LettersSequence</span><span class="o">.</span><span class="n">uppercase_letters_acceptor</span><span class="p">(</span><span class="n">letters</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">UnpronouncableLettersSequence</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper transducer which loads ngrams of characters which are not common in regular words</span>
+<span class="sd">    and is used to recognized OOV abbreviations. This is not very reliable method, so</span>
+<span class="sd">    it is applied only for sequences of characters which are upper-case in the text.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ngrams</span> <span class="o">=</span> <span class="n">load_csv</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;abbreviations&quot;</span><span class="p">,</span> <span class="s2">&quot;ngrams.tsv&quot;</span><span class="p">))</span>
+        <span class="n">ngrams_fsts_with_prefix</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[]</span>
+        <span class="p">)</span>  <span class="c1"># unpronounceable sequence is at the end of the word</span>
+        <span class="n">ngrams_fsts_with_suffix</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[]</span>
+        <span class="p">)</span>  <span class="c1"># unpronounceable sequence is at the beginning of the word</span>
+        <span class="n">ngrams_fsts_with_both</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># unpronounceable sequence is anywhere in the word</span>
+        <span class="k">for</span> <span class="n">letters</span> <span class="ow">in</span> <span class="n">ngrams</span><span class="p">:</span>
+            <span class="c1"># &quot;^&quot; and &quot;$&quot; marks beginning and end of the word respectively</span>
+            <span class="n">fst</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">letters</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;^$&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">letters</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;^&quot;</span><span class="p">):</span>
+                <span class="n">ngrams_fsts_with_suffix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fst</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">letters</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">):</span>
+                <span class="n">ngrams_fsts_with_prefix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fst</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ngrams_fsts_with_both</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fst</span><span class="p">)</span>
+        <span class="nb">all</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># adding closure for each ngram individually is very slow</span>
+        <span class="k">if</span> <span class="n">ngrams_fsts_with_prefix</span><span class="p">:</span>
+            <span class="n">ngrams_fsts_with_prefix</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">ngrams_fsts_with_prefix</span><span class="p">)</span>
+            <span class="n">ngrams_fsts_with_prefix</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span><span class="p">)</span> <span class="o">+</span> <span class="n">ngrams_fsts_with_prefix</span>
+            <span class="nb">all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ngrams_fsts_with_prefix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ngrams_fsts_with_suffix</span><span class="p">:</span>
+            <span class="n">ngrams_fsts_with_suffix</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">ngrams_fsts_with_suffix</span><span class="p">)</span>
+            <span class="n">ngrams_fsts_with_suffix</span> <span class="o">=</span> <span class="n">ngrams_fsts_with_suffix</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span><span class="p">)</span>
+            <span class="nb">all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ngrams_fsts_with_suffix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ngrams_fsts_with_both</span><span class="p">:</span>
+            <span class="n">ngrams_fsts_with_both</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">ngrams_fsts_with_both</span><span class="p">)</span>
+            <span class="n">ngrams_fsts_with_both</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span><span class="p">)</span> <span class="o">+</span> <span class="n">ngrams_fsts_with_both</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="nb">all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ngrams_fsts_with_both</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fst</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="nb">all</span><span class="p">)</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="AbbreviationFst"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.AbbreviationFst.html#en_us_normalization.production.classify.AbbreviationFst">[docs]</a><span class="k">class</span> <span class="nc">AbbreviationFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Grammar for classifying abbreviations e.g.:</span>
+
+<span class="sd">    - F.B.I. -&gt; word: &quot;FBI&quot;</span>
+<span class="sd">    - f.b.i. -&gt; word: &quot;FBI&quot;</span>
+<span class="sd">    - AI -&gt; word: &quot;AI&quot;</span>
+
+<span class="sd">    The convention is that text normalization generally returns normalized text in lower case,</span>
+<span class="sd">    but words that needs to be spelled (pronounced letter by letter) are capitalized.</span>
+<span class="sd">    There is no extra verbalization needed for abbreviation (apart from custom pronunciation generation),</span>
+<span class="sd">    thus after classification, abbreviations are marked as regular words and are not passed for verbalization.</span>
+
+<span class="sd">    Rules to detect abbreviations:</span>
+
+<span class="sd">    1. Classic abbreviation - letters separated by dots</span>
+<span class="sd">       upper or lower case, starting from a single letter</span>
+<span class="sd">       for ex. f. or F.B.I.</span>
+<span class="sd">    2. Consonants abbreviation - word contains only consonants</span>
+<span class="sd">       (except &quot;y&quot;). This can&#39;t be pronounced and should be spelled.</span>
+<span class="sd">    3. Vowels abbreviation - word contains only vowels. The rule is more</span>
+<span class="sd">       cautious however than for consonants. It affects only sequences</span>
+<span class="sd">       of 3 letters and sequences of 2 letters if those are upper case.</span>
+<span class="sd">       This is done to keep &quot;a&quot;, &quot;i&quot;, &quot;oi&quot; as is.</span>
+<span class="sd">    4. Acronyms - smth that may look like abbreviation, but is actually</span>
+<span class="sd">       pronounced as a regular word. For example, &quot;NATO&quot; or &quot;NASA&quot;.</span>
+<span class="sd">       This is essentially exceptions that are anti-abbreviations.</span>
+<span class="sd">       Those are recognized using list from abbreviations/acronyms.tsv</span>
+<span class="sd">    5. Cased abbreviations - some abbreviations only make sense when</span>
+<span class="sd">       they are in a specific case. For example &quot;US&quot; - is a country, while &quot;us&quot; is a regular word.</span>
+<span class="sd">       Those are recognized using list from abbreviations/abbreviations_cased.tsv</span>
+<span class="sd">    6. abbreviations - some abbreviations are case-independent as should be recognized as abbreviation</span>
+<span class="sd">       in any case, for example &quot;usa&quot;. Those are recognized using list from abbreviations/abbreviations.tsv</span>
+<span class="sd">    7. unpronounceable sequences - some sequences of letters are simply unpronounceable and they indicate that</span>
+<span class="sd">       the whole word should be spelled. List of letter n-grams that can&#39;t be pronounced is in</span>
+<span class="sd">       abbreviations/ngrams.tsv. This rule is only applied to upper-case words.</span>
+<span class="sd">    8. ampersand abbreviation - words with upper case letters and &quot;&amp;&quot; in the middle is an abbreviation, for example:</span>
+<span class="sd">       &quot;AT&amp;T&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AbbreviationFst.__init__"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.AbbreviationFst.html#en_us_normalization.production.classify.AbbreviationFst.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;abbreviation&quot;</span><span class="p">)</span>
+        <span class="n">letters_sequence</span> <span class="o">=</span> <span class="n">LettersSequence</span><span class="p">()</span>
+
+        <span class="c1"># 1. classic dot-separated abbreviation</span>
+        <span class="n">delete_dot</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">dot_abbr</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">((</span><span class="n">UPPER</span> <span class="o">|</span> <span class="p">(</span><span class="n">LOWER</span> <span class="o">@</span> <span class="n">TO_UPPER</span><span class="p">))</span> <span class="o">+</span> <span class="n">delete_dot</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># 2. consonants abbreviation</span>
+        <span class="n">consonant_abbr</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">letters_sequence</span><span class="o">.</span><span class="n">consonants_fst</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># 3. vowels abbreviation</span>
+        <span class="n">vowel_abbr</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">letters_sequence</span><span class="o">.</span><span class="n">uppercase_vowels_fst</span><span class="p">,</span> <span class="mi">2</span>
+        <span class="p">)</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">letters_sequence</span><span class="o">.</span><span class="n">lowercase_vowels_fst</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># 4. acronyms</span>
+        <span class="n">acronyms_lst</span> <span class="o">=</span> <span class="n">load_csv</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;abbreviations&quot;</span><span class="p">,</span> <span class="s2">&quot;acronyms.tsv&quot;</span><span class="p">))</span>
+        <span class="n">acronyms_vocab_abbr</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">TO_LOWER</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">acronyms_lst</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 5. cased abbreviations</span>
+        <span class="n">cased_abbr_lst</span> <span class="o">=</span> <span class="n">load_csv</span><span class="p">(</span>
+            <span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;abbreviations&quot;</span><span class="p">,</span> <span class="s2">&quot;abbreviations_cased.tsv&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">to_upper_or_accep</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span> <span class="o">|</span> <span class="p">(</span><span class="n">LOWER</span> <span class="o">@</span> <span class="n">TO_UPPER</span><span class="p">))</span>
+        <span class="n">cased_vocab_abbr</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">@</span> <span class="n">to_upper_or_accep</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cased_abbr_lst</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 6. abbreviations</span>
+        <span class="n">abbr_lst</span> <span class="o">=</span> <span class="n">load_csv</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;abbreviations&quot;</span><span class="p">,</span> <span class="s2">&quot;abbreviations.tsv&quot;</span><span class="p">))</span>
+        <span class="n">abbr_fsts_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">abbr</span> <span class="ow">in</span> <span class="n">abbr_lst</span><span class="p">:</span>
+            <span class="c1"># sequence of characters: lower converted to upper or just upper</span>
+            <span class="n">seq</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="o">@</span> <span class="n">TO_UPPER</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">abbr</span>
+            <span class="p">]</span>
+            <span class="n">seq_fst</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">seq_fst</span> <span class="o">+=</span> <span class="n">element</span>
+            <span class="n">abbr_fsts_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seq_fst</span><span class="p">)</span>
+        <span class="n">vocab_abbr</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">abbr_fsts_lst</span><span class="p">)</span>
+
+        <span class="c1"># 7. unpronounceable sequences</span>
+        <span class="n">unpron_abbr</span> <span class="o">=</span> <span class="n">UnpronouncableLettersSequence</span><span class="p">()</span><span class="o">.</span><span class="n">fst</span>
+
+        <span class="c1"># 8. ampersand abbreviation</span>
+        <span class="n">and_abbr</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot; and &quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># abbreviation may have a suffix, for ex s, &#39;s or &#39;S</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;S&quot;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">|=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">),</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">))</span>
+        <span class="n">optional_suffix</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">abbr</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">dot_abbr</span>
+            <span class="o">|</span> <span class="n">consonant_abbr</span>
+            <span class="o">|</span> <span class="n">vowel_abbr</span>
+            <span class="o">|</span> <span class="n">acronyms_vocab_abbr</span>
+            <span class="o">|</span> <span class="n">cased_vocab_abbr</span>
+            <span class="o">|</span> <span class="n">vocab_abbr</span>
+            <span class="o">|</span> <span class="n">unpron_abbr</span>
+            <span class="o">|</span> <span class="n">and_abbr</span>
+        <span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">abbr</span> <span class="o">+</span> <span class="n">optional_suffix</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;name: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">graph</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_to_self</span><span class="p">(</span><span class="n">connector_in</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">connector_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connector_spaces</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

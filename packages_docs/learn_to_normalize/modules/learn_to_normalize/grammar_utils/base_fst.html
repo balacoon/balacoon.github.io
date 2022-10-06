@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_normalize.grammar_utils.base_fst &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
+        <script src="../../../static/jquery.js"></script>
+        <script src="../../../static/underscore.js"></script>
+        <script src="../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../static/doctools.js"></script>
+    <script src="../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>learn_to_normalize.grammar_utils.base_fst</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for learn_to_normalize.grammar_utils.base_fst</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+
+<span class="sd">base class for all the grammars</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">wrap_token</span><span class="p">,</span> <span class="n">delete_space</span><span class="p">,</span> <span class="n">insert_space</span>
+
+
+<div class="viewcode-block" id="BaseFst"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.BaseFst.html#learn_to_normalize.grammar_utils.BaseFst">[docs]</a><span class="k">class</span> <span class="nc">BaseFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for text normalization rules. Wrapper around</span>
+<span class="sd">    pynini FST, implements some common functions used in</span>
+<span class="sd">    tokenization / verbalization</span>
+
+<span class="sd">    BaseFST implements a logic of connecting transducer to itself, for ex. when it is allowed</span>
+<span class="sd">    to connect a semiotic class to itself. It is expected that implementations of BaseFst</span>
+<span class="sd">    would first define self._single_fst and then can call :func:`.connect_to_self` multiple times.</span>
+<span class="sd">    At usage (when merging all transducers together), one just refers to fst which returns</span>
+<span class="sd">    multi or single fst depending on what&#39;s available.</span>
+
+<span class="sd">    When reusing fst in other semiotic classes you probably want to access single_fst though.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BaseFst.__init__"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.BaseFst.html#learn_to_normalize.grammar_utils.BaseFst.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_multi_fst</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multi_fst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multi_fst</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;both single- and multi-token fsts are None for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">single_fst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span>
+
+<div class="viewcode-block" id="BaseFst.add_tokens"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.BaseFst.html#learn_to_normalize.grammar_utils.BaseFst.add_tokens">[docs]</a>    <span class="k">def</span> <span class="nf">add_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fst</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wraps fst into curly brackets and prepends with name of grammar.</span>
+<span class="sd">        Used in tokenization/classification</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fst: pynini.FstLike</span>
+<span class="sd">            fst to wrap</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fst: pynini.FstLike</span>
+<span class="sd">            fst wrapped with grammar names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> {{ &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span> <span class="o">+</span> <span class="n">fst</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot; }&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseFst.delete_tokens"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.BaseFst.html#learn_to_normalize.grammar_utils.BaseFst.delete_tokens">[docs]</a>    <span class="k">def</span> <span class="nf">delete_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fst</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes name grammar name from string passed for verbalization</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fst: pynini.FstLike</span>
+<span class="sd">            fst to remove grammar name from</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fst: pynini.FstLike</span>
+<span class="sd">            fst without grammar name and trailing straight slash</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">|&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span> <span class="o">+</span> <span class="n">fst</span></div>
+
+<div class="viewcode-block" id="BaseFst.connect_to_self"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.BaseFst.html#learn_to_normalize.grammar_utils.BaseFst.connect_to_self">[docs]</a>    <span class="k">def</span> <span class="nf">connect_to_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connector_in</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">connector_out</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+                        <span class="n">connector_spaces</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">to_closure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="n">to_closure_connector</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function which connects self.fst to itself through intermediate connector.</span>
+<span class="sd">        Should be applied at final stage of creating classification transducer</span>
+<span class="sd">        For example, allows to connect cardinals with a dash, i.e. &quot;28 - 40&quot; which means range.</span>
+<span class="sd">        It changes `self.fst` to `self.fst | (self.fst + connector + self.fst)`</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        connector_in: Union[str, List[str]]</span>
+<span class="sd">            which connector tokens to look for. either single connector or multiple</span>
+<span class="sd">        connector_out: Union[str, List[str]]</span>
+<span class="sd">            what is the expansion of a connector. For example &quot;-&quot; in case of range is expanded to &quot;to&quot;.</span>
+<span class="sd">            If its none, transducer just deletes strings from `connector_in`</span>
+<span class="sd">        connector_spaces: str</span>
+<span class="sd">            defines which spaces are allowed around connector</span>
+
+<span class="sd">            `any` - means can be no or any number of spaces both form left and right from connector</span>
+<span class="sd">            `none_or_one` - means there is no spaces around connector or one from each side, for ex. 1:2 or 1 : 2.</span>
+<span class="sd">            `none` - there shouldn&#39;t be any spaces around connector</span>
+
+<span class="sd">        weight: float</span>
+<span class="sd">            weight to add to multi-token branch</span>
+<span class="sd">        to_closure: bool</span>
+<span class="sd">            if True, allows multiple repetitions of (connector + fst)</span>
+<span class="sd">        to_closure_connector: bool</span>
+<span class="sd">            if True, also closure connector, so multiple occurrences of same connector between tokens are allowed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connector_in</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">connector_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">connector_in</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">connector_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connector_out</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">connector_out</span> <span class="o">=</span> <span class="p">[</span><span class="n">connector_out</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">connector_in</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">connector_out</span><span class="p">),</span> <span class="s2">&quot;Number of in/out connectors should be the same!&quot;</span>
+
+        <span class="n">all_connectors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">connector_out</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c_in</span><span class="p">,</span> <span class="n">c_out</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">connector_in</span><span class="p">,</span> <span class="n">connector_out</span><span class="p">):</span>
+                <span class="n">connector</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">c_in</span><span class="p">,</span> <span class="n">c_out</span><span class="p">)</span>
+                <span class="n">connector</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;name: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">connector</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+                <span class="n">connector</span> <span class="o">=</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">connector</span><span class="p">)</span>
+                <span class="n">all_connectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connector</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_connectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">connector_in</span><span class="p">]</span>
+
+        <span class="n">final_connector</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">all_connectors</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">to_closure_connector</span><span class="p">:</span>
+            <span class="n">closured_connector</span> <span class="o">=</span> <span class="n">final_connector</span>
+            <span class="k">if</span> <span class="n">connector_out</span><span class="p">:</span>
+                <span class="n">closured_connector</span> <span class="o">=</span> <span class="n">insert_space</span> <span class="o">+</span> <span class="n">final_connector</span>
+            <span class="n">final_connector</span> <span class="o">+=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">closured_connector</span><span class="p">)</span>
+
+        <span class="c1"># define spaces and surround connector with spaces</span>
+        <span class="k">if</span> <span class="n">connector_spaces</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
+            <span class="c1"># remove all spaces (no matter how many including 0) and insert just one.</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="n">delete_space</span> <span class="o">+</span> <span class="n">insert_space</span>
+        <span class="k">elif</span> <span class="n">connector_spaces</span> <span class="o">==</span> <span class="s2">&quot;none_or_one&quot;</span><span class="p">:</span>
+            <span class="c1"># either accept just one space or expect no spaces and insert one</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">insert_space</span>
+        <span class="k">elif</span> <span class="n">connector_spaces</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+            <span class="c1"># no spaces around connector expected</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="n">insert_space</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unexpected configuration of spaces around connector: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">connector_spaces</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">connector_out</span><span class="p">:</span>
+            <span class="n">final_connector</span> <span class="o">=</span> <span class="n">space</span> <span class="o">+</span> <span class="n">final_connector</span> <span class="o">+</span> <span class="n">space</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">final_connector</span> <span class="o">=</span> <span class="n">space</span> <span class="o">+</span> <span class="n">final_connector</span> <span class="o">+</span> <span class="n">delete_space</span>
+
+        <span class="n">extra_fst</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39; }&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">final_connector</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;tokens { &#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_fst</span>
+        <span class="k">if</span> <span class="n">to_closure</span><span class="p">:</span>
+            <span class="n">extra_fst</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">extra_fst</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">multi_fst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_fst</span> <span class="o">+</span> <span class="n">extra_fst</span>
+        <span class="k">if</span> <span class="n">weight</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">multi_fst</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">multi_fst</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multi_fst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_multi_fst</span> <span class="o">|=</span> <span class="n">multi_fst</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_multi_fst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">|</span> <span class="n">multi_fst</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_multi_fst</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BaseFst.apply"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.BaseFst.html#learn_to_normalize.grammar_utils.BaseFst.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        helper method to apply the grammar to input text</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        text: str</span>
+<span class="sd">            input string to apply transducer to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        res: str</span>
+<span class="sd">            transduced string. In case of tokenize/classify - returns</span>
+<span class="sd">            string parsable into protobuf. In case of verbalization,</span>
+<span class="sd">            converts the text into spoken form</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">text</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">fst</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">shortestpath</span><span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">nshortest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">string</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">res</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

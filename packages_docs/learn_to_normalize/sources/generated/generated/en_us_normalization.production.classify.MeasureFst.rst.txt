@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.MeasureFst
+====================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: MeasureFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

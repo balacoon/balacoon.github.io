@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.AddressFst
+====================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: AddressFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

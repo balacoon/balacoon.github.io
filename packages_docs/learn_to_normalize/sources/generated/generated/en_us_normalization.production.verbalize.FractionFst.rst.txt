@@ -1,0 +1,11 @@
+en\_us\_normalization.production.verbalize.FractionFst
+======================================================
+
+.. currentmodule:: en_us_normalization.production.verbalize
+
+.. autoclass:: FractionFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

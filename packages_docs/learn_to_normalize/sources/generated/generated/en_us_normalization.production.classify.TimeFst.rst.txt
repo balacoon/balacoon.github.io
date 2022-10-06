@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.TimeFst
+=================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: TimeFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

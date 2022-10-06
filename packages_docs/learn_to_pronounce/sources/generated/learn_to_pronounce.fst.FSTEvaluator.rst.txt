@@ -1,0 +1,11 @@
+﻿learn\_to\_pronounce.fst.FSTEvaluator
+=====================================
+
+.. currentmodule:: learn_to_pronounce.fst
+
+.. autoclass:: FSTEvaluator
+    :members:
+
+    
+    .. automethod:: __init__
+    

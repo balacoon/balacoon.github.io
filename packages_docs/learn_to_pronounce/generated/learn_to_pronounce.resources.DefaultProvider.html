@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_pronounce.resources.DefaultProvider &mdash; learn_to_pronounce 0.1 documentation</title>
+      <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../static/doctools.js"></script>
+    <script src="../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Phonetics" href="../phonetics.html" />
+    <link rel="prev" title="learn_to_pronounce.resources.AbstractProvider" href="learn_to_pronounce.resources.AbstractProvider.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> learn_to_pronounce
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../fst.html">FST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../addon.html">Addon</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../resources.html">Resources</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="learn_to_pronounce.resources.AbstractProvider.html">learn_to_pronounce.resources.AbstractProvider</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">learn_to_pronounce.resources.DefaultProvider</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../phonetics.html">Phonetics</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">learn_to_pronounce</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API</a> &raquo;</li>
+          <li><a href="../resources.html">Resources</a> &raquo;</li>
+      <li>learn_to_pronounce.resources.DefaultProvider</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../sources/generated/learn_to_pronounce.resources.DefaultProvider.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="learn-to-pronounce-resources-defaultprovider">
+<h1>learn_to_pronounce.resources.DefaultProvider<a class="headerlink" href="#learn-to-pronounce-resources-defaultprovider" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">learn_to_pronounce.resources.</span></span><span class="sig-name descname"><span class="pre">DefaultProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resources_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider" title="Permalink to this definition"></a></dt>
+<dd><p>default implementation of resources provider. If resources provider is not part of
+resource directory, the default provider will be used. That expects resources to have specific names
+and be formatted in specific way. If custom format for resources is used, custom resource provider should
+be implemented.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resources_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>resources_dir: str</strong></dt><dd><p>Directory with pronunciation resources (lexicon, phonemes, graphemes, etc)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.LEXICON_FILE_NAME">
+<span class="sig-name descname"><span class="pre">LEXICON_FILE_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'lexicon'</span></em><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.LEXICON_FILE_NAME" title="Permalink to this definition"></a></dt>
+<dd><p>name of the file with pronunciation dictionary</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.PHONEMES_FILE_NAME">
+<span class="sig-name descname"><span class="pre">PHONEMES_FILE_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'phonemes'</span></em><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.PHONEMES_FILE_NAME" title="Permalink to this definition"></a></dt>
+<dd><p>name of the file with list of phonemes</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.TEST_WORDS">
+<span class="sig-name descname"><span class="pre">TEST_WORDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'test_words'</span></em><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.TEST_WORDS" title="Permalink to this definition"></a></dt>
+<dd><p>name of the file with words for evaluation of pronunciation generation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.TRAIN_WORDS">
+<span class="sig-name descname"><span class="pre">TRAIN_WORDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'train_words'</span></em><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.TRAIN_WORDS" title="Permalink to this definition"></a></dt>
+<dd><p>name of the file with words to be used for training of pronunciation generation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.get_graphemes">
+<span class="sig-name descname"><span class="pre">get_graphemes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.get_graphemes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.get_graphemes" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference internal" href="learn_to_pronounce.resources.AbstractProvider.html#learn_to_pronounce.resources.AbstractProvider.get_graphemes" title="learn_to_pronounce.resources.AbstractProvider.get_graphemes"><code class="xref py py-func docutils literal notranslate"><span class="pre">AbstractProvider.get_graphemes()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.get_lexicon">
+<span class="sig-name descname"><span class="pre">get_lexicon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">words</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pronunciation_generation.PronunciationDictionary</span></span></span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.get_lexicon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.get_lexicon" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference internal" href="learn_to_pronounce.resources.AbstractProvider.html#learn_to_pronounce.resources.AbstractProvider.get_lexicon" title="learn_to_pronounce.resources.AbstractProvider.get_lexicon"><code class="xref py py-func docutils literal notranslate"><span class="pre">AbstractProvider.get_lexicon()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.get_phonemes">
+<span class="sig-name descname"><span class="pre">get_phonemes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.get_phonemes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.get_phonemes" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference internal" href="learn_to_pronounce.resources.AbstractProvider.html#learn_to_pronounce.resources.AbstractProvider.get_phonemes" title="learn_to_pronounce.resources.AbstractProvider.get_phonemes"><code class="xref py py-func docutils literal notranslate"><span class="pre">AbstractProvider.get_phonemes()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.get_spelling_lexicon">
+<span class="sig-name descname"><span class="pre">get_spelling_lexicon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pronunciation_generation.PronunciationDictionary</span></span></span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.get_spelling_lexicon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.get_spelling_lexicon" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference internal" href="learn_to_pronounce.resources.AbstractProvider.html#learn_to_pronounce.resources.AbstractProvider.get_spelling_lexicon" title="learn_to_pronounce.resources.AbstractProvider.get_spelling_lexicon"><code class="xref py py-func docutils literal notranslate"><span class="pre">AbstractProvider.get_spelling_lexicon()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.get_test_words">
+<span class="sig-name descname"><span class="pre">get_test_words</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.get_test_words"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.get_test_words" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference internal" href="learn_to_pronounce.resources.AbstractProvider.html#learn_to_pronounce.resources.AbstractProvider.get_test_words" title="learn_to_pronounce.resources.AbstractProvider.get_test_words"><code class="xref py py-func docutils literal notranslate"><span class="pre">AbstractProvider.get_test_words()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.get_train_words">
+<span class="sig-name descname"><span class="pre">get_train_words</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.get_train_words"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.get_train_words" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference internal" href="learn_to_pronounce.resources.AbstractProvider.html#learn_to_pronounce.resources.AbstractProvider.get_train_words" title="learn_to_pronounce.resources.AbstractProvider.get_train_words"><code class="xref py py-func docutils literal notranslate"><span class="pre">AbstractProvider.get_train_words()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.parse_lexicon">
+<span class="sig-name descname"><span class="pre">parse_lexicon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">words</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pronunciation_generation.PronunciationDictionary</span></span></span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.parse_lexicon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.parse_lexicon" title="Permalink to this definition"></a></dt>
+<dd><p>Helper function that parses lexicon from a file.
+Expected format is:</p>
+<p>&lt;word&gt;  &lt;tag&gt;   &lt;pronunciation&gt;</p>
+<p>Where &lt;tag&gt; - is optional, &lt;pronunciation&gt; - sequence of phonemes separated with spaces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path: str</strong></dt><dd><p>path to parse lexicon from</p>
+</dd>
+<dt><strong>words: Iterable[str]</strong></dt><dd><p>list of words to include into returned PronunciationDictionary or None to include all.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>pd: PronunciationDictionary</dt><dd><p>pronunciation dictionary object from pronunciation_generation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_pronounce.resources.DefaultProvider.parse_lexicon_line">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_lexicon_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../modules/learn_to_pronounce/resources/provider.html#DefaultProvider.parse_lexicon_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_pronounce.resources.DefaultProvider.parse_lexicon_line" title="Permalink to this definition"></a></dt>
+<dd><p>Helper function that parses lexicon line</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>line: str</strong></dt><dd><p>line read from lexicon file within <code class="xref py py-func docutils literal notranslate"><span class="pre">get_lexicon()</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>word: str</dt><dd><p>string representation of a word</p>
+</dd>
+<dt>tag: str</dt><dd><p>tag of the pronunciation, empty string if pronunciation variant is not tagged</p>
+</dd>
+<dt>phonemes: str</dt><dd><p>phonemes representing pronunciation separated by space</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="learn_to_pronounce.resources.AbstractProvider.html" class="btn btn-neutral float-left" title="learn_to_pronounce.resources.AbstractProvider" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../phonetics.html" class="btn btn-neutral float-right" title="Phonetics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

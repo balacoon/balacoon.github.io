@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../static/doctools.js"></script>
+    <script src="../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="en_us_normalization.production.classify.ClassifyFst" href="generated/en_us_normalization.production.classify.ClassifyFst.html" />
+    <link rel="prev" title="Grammars" href="../grammars.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../grammars.html">Grammars</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">en_us_normalization.production</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#classification">Classification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tokenize-and-classify-rules">Tokenize and classify rules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#verbalization">Verbalization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#verbalization-rules">Verbalization rules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../grammars.html">Grammars</a> &raquo;</li>
+      <li>en_us_normalization.production</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../sources/generated/en_us_normalization.production.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-en_us_normalization.production">
+<span id="en-us-normalization-production"></span><h1>en_us_normalization.production<a class="headerlink" href="#module-en_us_normalization.production" title="Permalink to this heading"></a></h1>
+<p>Text normalization rules for english are adapted from NVIDIA:
+<a class="reference external" href="https://github.com/NVIDIA/NeMo/tree/main/nemo_text_processing/text_normalization/en">https://github.com/NVIDIA/NeMo/tree/main/nemo_text_processing/text_normalization/en</a></p>
+<section id="classification">
+<h2>Classification<a class="headerlink" href="#classification" title="Permalink to this heading"></a></h2>
+<p>1st step splits text into tokens and classifies tokens into semiotic classes.
+this is a big FST that converts input text to a tagged sequence:</p>
+<blockquote>
+<div><p>“12/04/15 at 3:30pm!”</p>
+<p>{ left_punct: “”” date { month: “december” day: “4” year: “15” } } tokens { name: “at” }
+tokens { time { hours: “3” minutes: “30” suffix: “PM” } right_punct: “!”” }</p>
+</div></blockquote>
+<span class="target" id="module-en_us_normalization.production.classify"></span><section id="tokenize-and-classify-rules">
+<h3>Tokenize and classify rules<a class="headerlink" href="#tokenize-and-classify-rules" title="Permalink to this heading"></a></h3>
+<p>Rules to split input string into tokens and classify them into semiotic classes.
+Rules parse tokens into pre-defined fields for each semiotic class, put it
+into pre-defined format, which is parsable into protobuf structure and can
+be further passed for verbalization, i.e. conversion into spoken form.</p>
+<p>Combining everything together into single FST:</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.ClassifyFst.html#en_us_normalization.production.classify.ClassifyFst" title="en_us_normalization.production.classify.ClassifyFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ClassifyFst</span></code></a></p></td>
+<td><p>Final class that composes all other classification grammars.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Acceptor for words that doesn’t require normalization:</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.WordFst.html#en_us_normalization.production.classify.WordFst" title="en_us_normalization.production.classify.WordFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WordFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying words - smth that doesn't need verbalization, i.e. it is already normalized and contains letters that are all known to pronunciation dictionary.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Rules for classification of different semiotic classes:</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.AbbreviationFst.html#en_us_normalization.production.classify.AbbreviationFst" title="en_us_normalization.production.classify.AbbreviationFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbbreviationFst</span></code></a></p></td>
+<td><p>Grammar for classifying abbreviations e.g.:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.AddressFst.html#en_us_normalization.production.classify.AddressFst" title="en_us_normalization.production.classify.AddressFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AddressFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying address.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.CardinalFst.html#en_us_normalization.production.classify.CardinalFst" title="en_us_normalization.production.classify.CardinalFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CardinalFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying cardinals - numbers expressing amount.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.DateFst.html#en_us_normalization.production.classify.DateFst" title="en_us_normalization.production.classify.DateFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DateFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying dates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.DecimalFst.html#en_us_normalization.production.classify.DecimalFst" title="en_us_normalization.production.classify.DecimalFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecimalFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying decimal, i.e. numbers with fractional part.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.ElectronicFst.html#en_us_normalization.production.classify.ElectronicFst" title="en_us_normalization.production.classify.ElectronicFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying electronic: as URLs, email addresses, etc.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.FractionFst.html#en_us_normalization.production.classify.FractionFst" title="en_us_normalization.production.classify.FractionFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FractionFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying fraction, for ex.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.MeasureFst.html#en_us_normalization.production.classify.MeasureFst" title="en_us_normalization.production.classify.MeasureFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeasureFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying measure, suppletive aware, i.e. 12kg -&gt; 12 kilograms, but 1kg -&gt; 1 kilogram.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.MoneyFst.html#en_us_normalization.production.classify.MoneyFst" title="en_us_normalization.production.classify.MoneyFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MoneyFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying money, suppletive aware.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.OrdinalFst.html#en_us_normalization.production.classify.OrdinalFst" title="en_us_normalization.production.classify.OrdinalFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrdinalFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying ordinal, i.e. cardinals with suffix In english there are just 4 suffixes to take of:.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.RomanFst.html#en_us_normalization.production.classify.RomanFst" title="en_us_normalization.production.classify.RomanFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RomanFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying romans (III, IV, etc).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.ShorteningFst.html#en_us_normalization.production.classify.ShorteningFst" title="en_us_normalization.production.classify.ShorteningFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShorteningFst</span></code></a></p></td>
+<td><p>Finite state transducer for discovering shortenings, such as Mrs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.TelephoneFst.html#en_us_normalization.production.classify.TelephoneFst" title="en_us_normalization.production.classify.TelephoneFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TelephoneFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying telephone numbers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.TimeFst.html#en_us_normalization.production.classify.TimeFst" title="en_us_normalization.production.classify.TimeFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.VerbatimFst.html#en_us_normalization.production.classify.VerbatimFst" title="en_us_normalization.production.classify.VerbatimFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VerbatimFst</span></code></a></p></td>
+<td><p>Finite state transducer for classifying verbatims - anything that has extra symbols and doesn't match available semiotic classes.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Sometimes tokens are not separated by whitespace, but
+with special connectors. This requires introduction of
+multi-token FSTs:</p>
+<span class="target" id="module-en_us_normalization.production.classify.multi_token"></span><section id="tagging-with-multi-token-rules">
+<h4>Tagging with multi-token rules<a class="headerlink" href="#tagging-with-multi-token-rules" title="Permalink to this heading"></a></h4>
+<p>In some contexts, semiotic classes are
+connected with symbols that needs to be
+read out loud. For example “5 x 3” is “five times three”,
+not “five eks three”.
+At verbalization, tagged tokens are processed separately,
+but at classification a single multi-token FST is needed.</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.classify.multi_token.AttachedTokensFst.html#en_us_normalization.production.classify.multi_token.AttachedTokensFst" title="en_us_normalization.production.classify.multi_token.AttachedTokensFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttachedTokensFst</span></code></a></p></td>
+<td><p>Attached tokens tries to deal with multi-token string which have <cite>dash</cite> as a separator or doesn't have any separator at all.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+<section id="verbalization">
+<h2>Verbalization<a class="headerlink" href="#verbalization" title="Permalink to this heading"></a></h2>
+<p>Tagged tokens are parsed with <cite>text_normalization</cite> and semiotic classes are passed
+for verbalization. During verbalization, serialized tokens are converted to spoken form:</p>
+<blockquote>
+<div><p>date|month:december|day:4|year:15|</p>
+<p>december fourth fifteen</p>
+</div></blockquote>
+<span class="target" id="module-en_us_normalization.production.verbalize"></span><section id="verbalization-rules">
+<h3>Verbalization rules<a class="headerlink" href="#verbalization-rules" title="Permalink to this heading"></a></h3>
+<p>Rules to convert semiotic classes into spoken form.
+Regular words are not passed for verbalization.
+Each semiotic class has predefined set of fields, that
+verbalization grammar should take care of.
+Verbalization grammars drop field names and transduce field values
+into words.</p>
+<p>Combining everything together into single FST:</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.VerbalizeFst.html#en_us_normalization.production.verbalize.VerbalizeFst" title="en_us_normalization.production.verbalize.VerbalizeFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VerbalizeFst</span></code></a></p></td>
+<td><p>Final class that composes all other verbalization grammars.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Rules for verbalization of different semiotic classes:</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.CardinalFst.html#en_us_normalization.production.verbalize.CardinalFst" title="en_us_normalization.production.verbalize.CardinalFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CardinalFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing cardinal number.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.OrdinalFst.html#en_us_normalization.production.verbalize.OrdinalFst" title="en_us_normalization.production.verbalize.OrdinalFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OrdinalFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing ordinal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.DecimalFst.html#en_us_normalization.production.verbalize.DecimalFst" title="en_us_normalization.production.verbalize.DecimalFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecimalFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing decimal, i.e. number with integer and fractional part.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.FractionFst.html#en_us_normalization.production.verbalize.FractionFst" title="en_us_normalization.production.verbalize.FractionFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FractionFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing fraction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.RomanFst.html#en_us_normalization.production.verbalize.RomanFst" title="en_us_normalization.production.verbalize.RomanFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RomanFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing roman numerals.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.DateFst.html#en_us_normalization.production.verbalize.DateFst" title="en_us_normalization.production.verbalize.DateFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DateFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalization of dates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.VerbatimFst.html#en_us_normalization.production.verbalize.VerbatimFst" title="en_us_normalization.production.verbalize.VerbatimFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VerbatimFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing verbatim, i.e. any leftovers after classification into semiotic classes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.ElectronicFst.html#en_us_normalization.production.verbalize.ElectronicFst" title="en_us_normalization.production.verbalize.ElectronicFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElectronicFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing electronic addresses.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.MeasureFst.html#en_us_normalization.production.verbalize.MeasureFst" title="en_us_normalization.production.verbalize.MeasureFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MeasureFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing measures.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.MoneyFst.html#en_us_normalization.production.verbalize.MoneyFst" title="en_us_normalization.production.verbalize.MoneyFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MoneyFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing money.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/en_us_normalization.production.verbalize.TimeFst.html#en_us_normalization.production.verbalize.TimeFst" title="en_us_normalization.production.verbalize.TimeFst"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeFst</span></code></a></p></td>
+<td><p>Finite state transducer for verbalizing time.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../grammars.html" class="btn btn-neutral float-left" title="Grammars" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="generated/en_us_normalization.production.classify.ClassifyFst.html" class="btn btn-neutral float-right" title="en_us_normalization.production.classify.ClassifyFst" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

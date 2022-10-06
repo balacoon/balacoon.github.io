@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.WordFst
+=================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: WordFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

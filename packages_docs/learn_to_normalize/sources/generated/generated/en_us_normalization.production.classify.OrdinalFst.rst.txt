@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.OrdinalFst
+====================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: OrdinalFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

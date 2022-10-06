@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.classify.multi_token.attached &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../static/documentation_options.js"></script>
+        <script src="../../../../../static/jquery.js"></script>
+        <script src="../../../../../static/underscore.js"></script>
+        <script src="../../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../../static/doctools.js"></script>
+    <script src="../../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+      <li>en_us_normalization.production.classify.multi_token.attached</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for en_us_normalization.production.classify.multi_token.attached</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright Balacoon 2022</span>
+
+<span class="sd">tokenize and classify merged tokens</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.english_utils</span> <span class="kn">import</span> <span class="n">get_data_file_path</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.classify.abbreviation</span> <span class="kn">import</span> <span class="n">AbbreviationFst</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.classify.cardinal</span> <span class="kn">import</span> <span class="n">CardinalFst</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.classify.punctuation_rules</span> <span class="kn">import</span> <span class="n">get_punctuation_rules</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.classify.word</span> <span class="kn">import</span> <span class="n">WordFst</span>
+<span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">delete_space</span><span class="p">,</span> <span class="n">insert_space</span><span class="p">,</span> <span class="n">wrap_token</span>
+
+
+<div class="viewcode-block" id="AttachedTokensFst"><a class="viewcode-back" href="../../../../../generated/generated/en_us_normalization.production.classify.multi_token.AttachedTokensFst.html#en_us_normalization.production.classify.multi_token.AttachedTokensFst">[docs]</a><span class="k">class</span> <span class="nc">AttachedTokensFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attached tokens tries to deal with multi-token string which have</span>
+<span class="sd">    `dash` as a separator or doesn&#39;t have any separator at all.</span>
+<span class="sd">    For example &quot;look33&quot; or &quot;AT&amp;T-wireless&quot;. This FST takes advantage of the</span>
+<span class="sd">    fact that boundary between some semiotic classes is fairly obvious.</span>
+
+<span class="sd">    Examples of input / output:</span>
+
+<span class="sd">    - look33 -&gt;</span>
+<span class="sd">      tokens { name: &quot;look&quot; } tokens { cardinal { count: &quot;33&quot; } }</span>
+<span class="sd">    - AT&amp;T-wireless -&gt;</span>
+<span class="sd">      tokens { name: &quot;AT and T&quot; } tokens { name: &quot;wireless&quot; }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AttachedTokensFst.__init__"><a class="viewcode-back" href="../../../../../generated/generated/en_us_normalization.production.classify.multi_token.AttachedTokensFst.html#en_us_normalization.production.classify.multi_token.AttachedTokensFst.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cardinal</span><span class="p">:</span> <span class="n">CardinalFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">abbreviation</span><span class="p">:</span> <span class="n">AbbreviationFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">word</span><span class="p">:</span> <span class="n">WordFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">left_punct</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">right_punct</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        constructor of transducer handling attached (merged) tokens</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cardinal: CardinalFst</span>
+<span class="sd">            a cardinal to reuse</span>
+<span class="sd">        abbreviation: AbbreviationFst</span>
+<span class="sd">            abbreviation to reuse</span>
+<span class="sd">        word: WordFst</span>
+<span class="sd">            word to reuse</span>
+<span class="sd">        left_punct: pynini.FstLike</span>
+<span class="sd">            punctuation to the left of multi-token</span>
+<span class="sd">        right_punct: pynini.FstLike</span>
+<span class="sd">            punctuation to the right of multi-token</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;score&quot;</span><span class="p">)</span>
+
+        <span class="c1"># initialize transducers if those are not provided</span>
+        <span class="c1"># may be needed in testing.</span>
+        <span class="k">if</span> <span class="n">cardinal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cardinal</span> <span class="o">=</span> <span class="n">CardinalFst</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">abbreviation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">abbreviation</span> <span class="o">=</span> <span class="n">AbbreviationFst</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">word</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">word</span> <span class="o">=</span> <span class="n">WordFst</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">left_punct</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">right_punct</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">left_punct</span><span class="p">,</span> <span class="n">right_punct</span> <span class="o">=</span> <span class="n">get_punctuation_rules</span><span class="p">()</span>
+
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">string_file</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;symbols.tsv&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="c1"># penalize adding more symbols, so if there is another option (for example punctuation) - go with that</span>
+        <span class="n">multiple_symbols</span> <span class="o">=</span> <span class="n">symbols</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">insert_space</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">symbols</span><span class="p">)</span>
+        <span class="n">delete_hyphen</span> <span class="o">=</span> <span class="n">insert_space</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="n">optional_delete_hyphen</span> <span class="o">=</span> <span class="n">insert_space</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="c1"># boundary between abbreviation and word is not obvious, so expecting dash as a separator</span>
+        <span class="n">abbr_plus_word</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">abbreviation</span><span class="o">.</span><span class="n">fst</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">delete_hyphen</span>
+            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># boundary between abbreviation and number is obvious, so dash is optional</span>
+        <span class="n">abbr_plus_number</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">abbreviation</span><span class="o">.</span><span class="n">fst</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">optional_delete_hyphen</span>
+            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">cardinal</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># boundary between word and number is also obvious</span>
+        <span class="n">word_plus_number</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">word</span><span class="o">.</span><span class="n">fst</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">optional_delete_hyphen</span>
+            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">cardinal</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># boundary between word and symbols is obvious</span>
+        <span class="n">word_plus_symbols</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">word</span><span class="o">.</span><span class="n">fst</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">optional_delete_hyphen</span>
+            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;name: </span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">multiple_symbols</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># same the other way around</span>
+        <span class="n">symbols_plus_word</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;name: </span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">multiple_symbols</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">))</span>
+            <span class="o">+</span> <span class="n">optional_delete_hyphen</span>
+            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">hashtag</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="s2">&quot;name: </span><span class="se">\&quot;</span><span class="s2">hashtag</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">))</span>
+            <span class="o">+</span> <span class="n">insert_space</span>
+            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">abbr_plus_word</span>
+            <span class="o">|</span> <span class="n">abbr_plus_number</span>
+            <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">word_plus_number</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">word_plus_symbols</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>  <span class="c1"># regular word weight is 10, avoid shadowing word + punct</span>
+            <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">symbols_plus_word</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>  <span class="c1"># regular word weight is 10, avoid shadowing punct + word</span>
+            <span class="o">|</span> <span class="n">hashtag</span>  <span class="c1"># hashtag is overshadowed by symbols_plus_word but has higher weight</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_multi_fst</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

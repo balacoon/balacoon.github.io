@@ -1,0 +1,11 @@
+﻿learn\_to\_pronounce.resources.AbstractProvider
+===============================================
+
+.. currentmodule:: learn_to_pronounce.resources
+
+.. autoclass:: AbstractProvider
+    :members:
+
+    
+    .. automethod:: __init__
+    

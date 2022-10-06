@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.classify.measure &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../static/documentation_options.js"></script>
+        <script src="../../../../static/jquery.js"></script>
+        <script src="../../../../static/underscore.js"></script>
+        <script src="../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../static/doctools.js"></script>
+    <script src="../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>en_us_normalization.production.classify.measure</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for en_us_normalization.production.classify.measure</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+<span class="sd">Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.</span>
+<span class="sd">Copyright 2015 and onwards Google, Inc.</span>
+
+<span class="sd">tokenize and classify measures</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.classify.decimal</span> <span class="kn">import</span> <span class="n">DecimalFst</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.classify.fraction</span> <span class="kn">import</span> <span class="n">FractionFst</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.english_utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_data_file_path</span><span class="p">,</span>
+    <span class="n">singular_to_plural_fst</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">delete_space</span><span class="p">,</span> <span class="n">insert_space</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.data_loader</span> <span class="kn">import</span> <span class="n">load_mapping</span>
+
+
+<div class="viewcode-block" id="MeasureFst"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.MeasureFst.html#en_us_normalization.production.classify.MeasureFst">[docs]</a><span class="k">class</span> <span class="nc">MeasureFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finite state transducer for classifying measure, suppletive aware, i.e. 12kg -&gt; 12 kilograms,</span>
+<span class="sd">    but 1kg -&gt; 1 kilogram. Inside of measure semiotic class there is decimal or fraction</span>
+<span class="sd">    semiotic subclasses to specify the amount. Measure matches one of those and then measurement units</span>
+<span class="sd">    from the data file: &quot;measurements.tsv&quot;.</span>
+
+<span class="sd">    Examples of input strings and transducer outputs:</span>
+
+<span class="sd">    - -12kg -&gt;</span>
+<span class="sd">      measure { decimal { negative: &quot;true&quot; integer_part: &quot;12&quot; } units: &quot;kilograms&quot; }</span>
+<span class="sd">    - 1kg -&gt;</span>
+<span class="sd">      measure { decimal { integer_part: &quot;1&quot; } units: &quot;kilogram&quot; }</span>
+<span class="sd">    - 300,000 km/s -&gt;</span>
+<span class="sd">      measure { decimal { integer_part: &quot;300000&quot; } units: &quot;kilometers per second&quot; }</span>
+<span class="sd">    - .5kg -&gt;</span>
+<span class="sd">      measure { decimal { fractional_part: &quot;5&quot; } units: &quot;kilograms&quot; }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MeasureFst.__init__"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.MeasureFst.html#en_us_normalization.production.classify.MeasureFst.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decimal</span><span class="p">:</span> <span class="n">DecimalFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="n">FractionFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        constructor of measure fst</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        decimal: DecimalFst</span>
+<span class="sd">            fst with decimal numbers to reuse. Created from scratch if not provided.</span>
+<span class="sd">        fraction: FractionFst</span>
+<span class="sd">            fst with fractions to reuse as numbers. Created from scratch if not provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;measure&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">decimal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">decimal</span> <span class="o">=</span> <span class="n">DecimalFst</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">fraction</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fraction</span> <span class="o">=</span> <span class="n">FractionFst</span><span class="p">()</span>
+
+        <span class="c1"># expand units, i.e. kg -&gt; kilograms</span>
+        <span class="n">units_orig</span> <span class="o">=</span> <span class="n">load_mapping</span><span class="p">(</span>
+            <span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;measurements.tsv&quot;</span><span class="p">),</span>
+            <span class="n">key_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">key_with_dot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">val_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">units_plural_orig</span> <span class="o">=</span> <span class="n">units_orig</span> <span class="o">@</span> <span class="n">singular_to_plural_fst</span><span class="p">()</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_units_suffix</span><span class="p">(</span><span class="n">units_orig</span><span class="p">,</span> <span class="n">units_orig</span><span class="p">)</span>
+        <span class="n">units_plural</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_units_suffix</span><span class="p">(</span><span class="n">units_plural_orig</span><span class="p">,</span> <span class="n">units_orig</span><span class="p">)</span>
+
+        <span class="c1"># decimal with units, i.e. 3.4kg -&gt; decimal { integer_part: &quot;3&quot; fractional_part: &quot;4&quot; } units: &quot;kilograms&quot;</span>
+        <span class="c1"># special case when singular measures should be used</span>
+        <span class="n">one</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># reusing decimal without qunatity</span>
+        <span class="n">base_decimal_fst</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;decimal { &quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">get_basic_decimal_fst</span><span class="p">()</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot; }&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">decimal_with_singular_unit</span> <span class="o">=</span> <span class="n">one</span> <span class="o">@</span> <span class="n">base_decimal_fst</span> <span class="o">+</span> <span class="n">units</span>
+        <span class="c1"># generic case</span>
+        <span class="n">decimal_with_units</span> <span class="o">=</span> <span class="n">base_decimal_fst</span> <span class="o">+</span> <span class="n">units_plural</span>
+        <span class="c1"># less probable than special one</span>
+        <span class="n">decimal_with_units</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">decimal_with_units</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+        <span class="n">decimal_with_units</span> <span class="o">|=</span> <span class="n">decimal_with_singular_unit</span>
+
+        <span class="c1"># fraction with units, for ex. 1/2 kg</span>
+        <span class="c1"># fraction { numerator: &quot;1&quot; denominator: &quot;2&quot; } units: &quot;kilograms&quot; style_spec_name: &quot;with_explicit_fraction&quot;</span>
+        <span class="n">fraction_with_units</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">fraction</span><span class="o">.</span><span class="n">single_fst</span>
+            <span class="o">+</span> <span class="n">units_plural</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39; style_spec_name: &quot;with_explicit_fraction&quot;&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">final_graph</span> <span class="o">=</span> <span class="n">decimal_with_units</span> <span class="o">|</span> <span class="n">fraction_with_units</span>
+        <span class="n">final_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_tokens</span><span class="p">(</span><span class="n">final_graph</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="n">final_graph</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_to_self</span><span class="p">(</span><span class="n">connector_in</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">connector_out</span><span class="o">=</span><span class="s2">&quot;to&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_add_units_suffix</span><span class="p">(</span>
+        <span class="n">prefix_units</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">,</span> <span class="n">suffix_units</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        units can have suffix, i.e. plain unit is &quot;m&quot;, but unit with a suffix</span>
+<span class="sd">        is &quot;m/s^2&quot;. this helper function takes units transducer and adds optional</span>
+<span class="sd">        suffix to those</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fix_space</span> <span class="o">=</span> <span class="n">delete_space</span> <span class="o">+</span> <span class="n">insert_space</span>
+        <span class="n">suffix_units</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;per&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">fix_space</span> <span class="o">+</span> <span class="n">suffix_units</span>
+        <span class="n">units_tag</span> <span class="o">=</span> <span class="n">delete_space</span> <span class="o">+</span> <span class="n">insert_space</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;units: &quot;&#39;</span><span class="p">)</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="n">prefix_units</span> <span class="o">|</span> <span class="n">suffix_units</span> <span class="o">|</span> <span class="p">(</span><span class="n">prefix_units</span> <span class="o">+</span> <span class="n">fix_space</span> <span class="o">+</span> <span class="n">suffix_units</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">units_tag</span> <span class="o">+</span> <span class="n">units</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

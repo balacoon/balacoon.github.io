@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_pronounce.addon.addon_manager &mdash; learn_to_pronounce 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
+        <script src="../../../static/jquery.js"></script>
+        <script src="../../../static/underscore.js"></script>
+        <script src="../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../static/doctools.js"></script>
+    <script src="../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> learn_to_pronounce
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">learn_to_pronounce</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>learn_to_pronounce.addon.addon_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for learn_to_pronounce.addon.addon_manager</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+
+<span class="sd">manager that saves artifacts into addon</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">msgpack</span>
+<span class="kn">from</span> <span class="nn">pronunciation_generation</span> <span class="kn">import</span> <span class="n">PronunciationDictionary</span>
+<span class="kn">from</span> <span class="nn">pronunciation_generation</span> <span class="kn">import</span> <span class="n">PronunciationManager</span> <span class="k">as</span> <span class="n">pm</span>
+
+
+<div class="viewcode-block" id="AddonManager"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.addon.AddonManager.html#learn_to_pronounce.addon.AddonManager">[docs]</a><span class="k">class</span> <span class="nc">AddonManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manages addon creation, specifically adds all the necessary fields and artifacts.</span>
+<span class="sd">    Addon later can be used with pronunciation_generation package.</span>
+<span class="sd">    The work-flow - is that at each step of pronunciation learning recipe,</span>
+<span class="sd">    addon is loaded, new artifact is added and addon is saved. In that way, one</span>
+<span class="sd">    can restart addon building from any step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ADDON_FILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;pronunciation.addon&quot;</span>
+
+<div class="viewcode-block" id="AddonManager.__init__"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.addon.AddonManager.html#learn_to_pronounce.addon.AddonManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">locale</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        constructor of addon manager</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        work_dir: str</span>
+<span class="sd">            directory where all the temporal artifacts are stored</span>
+<span class="sd">        locale: str</span>
+<span class="sd">            locale of the pronunciation generation addon, for ex. en_us</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADDON_FILE_NAME</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">):</span>
+            <span class="c1"># there is no addon in work dir, create a dummy one</span>
+            <span class="n">addon_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">pm</span><span class="o">.</span><span class="n">addon_field_to_string</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">AddonFields</span><span class="o">.</span><span class="n">ID</span><span class="p">):</span> <span class="n">pm</span><span class="o">.</span><span class="n">addon_identifier</span><span class="p">(),</span>
+                <span class="n">pm</span><span class="o">.</span><span class="n">addon_field_to_string</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">AddonFields</span><span class="o">.</span><span class="n">LOCALE</span><span class="p">):</span> <span class="n">locale</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_addon_dict</span><span class="p">(</span><span class="n">addon_dict</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># there is already addon file, verify that locale is the same as current one</span>
+            <span class="n">addon_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_addon_dict</span><span class="p">()</span>
+            <span class="n">addon_locale</span> <span class="o">=</span> <span class="n">addon_dict</span><span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">addon_field_to_string</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">AddonFields</span><span class="o">.</span><span class="n">LOCALE</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">addon_locale</span> <span class="o">!=</span> <span class="n">locale</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Addon file exists and locale inside [</span><span class="si">{}</span><span class="s2">] doesn&#39;t match one specified [</span><span class="si">{}</span><span class="s2">].&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">addon_locale</span><span class="p">,</span> <span class="n">locale</span>
+                    <span class="p">)</span>
+                <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_load_addon_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function that loads addon as a dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">addon_dict</span> <span class="o">=</span> <span class="n">msgpack</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">addon_dict</span>
+
+    <span class="k">def</span> <span class="nf">_save_addon_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addon_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function that stores dictionary as an addon</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">msgpack</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">addon_dict</span><span class="p">],</span> <span class="n">fp</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AddonManager.save"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.addon.AddonManager.html#learn_to_pronounce.addon.AddonManager.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Copies addon to the specified path</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path: str</span>
+<span class="sd">            path to copy addon to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AddonManager.add_lexicon"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.addon.AddonManager.html#learn_to_pronounce.addon.AddonManager.add_lexicon">[docs]</a>    <span class="k">def</span> <span class="nf">add_lexicon</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pd</span><span class="p">:</span> <span class="n">PronunciationDictionary</span><span class="p">,</span> <span class="n">graphemes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">phonemes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds lexicon into addon. Also adds corresponding graphemes and phonemes</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pd: PronunciationDictionary</span>
+<span class="sd">            parsed lexicon that should be added into addon</span>
+<span class="sd">        graphemes: List[str]</span>
+<span class="sd">            list of valid graphemes (letters)</span>
+<span class="sd">        phonemes: List[str]</span>
+<span class="sd">            list of valid phonemes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">addon_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_addon_dict</span><span class="p">()</span>
+        <span class="n">addon_dict</span><span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">addon_field_to_string</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">AddonFields</span><span class="o">.</span><span class="n">LEXICON</span><span class="p">)]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+        <span class="n">addon_dict</span><span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">addon_field_to_string</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">AddonFields</span><span class="o">.</span><span class="n">GRAPHEMES</span><span class="p">)]</span> <span class="o">=</span> <span class="n">graphemes</span>
+        <span class="n">addon_dict</span><span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">addon_field_to_string</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">AddonFields</span><span class="o">.</span><span class="n">PHONEMES</span><span class="p">)]</span> <span class="o">=</span> <span class="n">phonemes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_addon_dict</span><span class="p">(</span><span class="n">addon_dict</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_add_fst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fst_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function that adds FST model into addon</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key: str</span>
+<span class="sd">            key under which to store FST</span>
+<span class="sd">        fst_path: str</span>
+<span class="sd">            path to FST model to load and add to addon</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">addon_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_addon_dict</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fst_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">fst_data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">addon_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">fst_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_addon_dict</span><span class="p">(</span><span class="n">addon_dict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AddonManager.add_pronunciation_fst"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.addon.AddonManager.html#learn_to_pronounce.addon.AddonManager.add_pronunciation_fst">[docs]</a>    <span class="k">def</span> <span class="nf">add_pronunciation_fst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fst_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds pronunciation FST into addon</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fst_path: str</span>
+<span class="sd">            path to FST model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_fst</span><span class="p">(</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">addon_field_to_string</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">AddonFields</span><span class="o">.</span><span class="n">FST_PRONUNCIATION_GENERATOR</span><span class="p">),</span>
+            <span class="n">fst_path</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AddonManager.add_spelling_fst"><a class="viewcode-back" href="../../../generated/learn_to_pronounce.addon.AddonManager.html#learn_to_pronounce.addon.AddonManager.add_spelling_fst">[docs]</a>    <span class="k">def</span> <span class="nf">add_spelling_fst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fst_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds spelling FST into addon</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fst_path: str</span>
+<span class="sd">            path to FST model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_fst</span><span class="p">(</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">addon_field_to_string</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">AddonFields</span><span class="o">.</span><span class="n">FST_SPELLING_GENERATOR</span><span class="p">),</span> <span class="n">fst_path</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

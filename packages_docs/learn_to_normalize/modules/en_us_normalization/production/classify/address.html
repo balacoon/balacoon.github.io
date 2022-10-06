@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.classify.address &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../static/documentation_options.js"></script>
+        <script src="../../../../static/jquery.js"></script>
+        <script src="../../../../static/underscore.js"></script>
+        <script src="../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../static/doctools.js"></script>
+    <script src="../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>en_us_normalization.production.classify.address</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for en_us_normalization.production.classify.address</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright Balacoon 2022</span>
+
+<span class="sd">tokenizes and classifies addresses</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.english_utils</span> <span class="kn">import</span> <span class="n">get_data_file_path</span>
+<span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.data_loader</span> <span class="kn">import</span> <span class="n">load_mapping</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">ALPHA</span><span class="p">,</span> <span class="n">DIGIT</span><span class="p">,</span> <span class="n">LOWER</span><span class="p">,</span> <span class="n">TO_LOWER</span><span class="p">,</span> <span class="n">TO_UPPER</span><span class="p">,</span> <span class="n">UPPER</span>
+
+
+<div class="viewcode-block" id="AddressFst"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.AddressFst.html#en_us_normalization.production.classify.AddressFst">[docs]</a><span class="k">class</span> <span class="nc">AddressFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finite state transducer for classifying address.</span>
+<span class="sd">    Address consists of multiple slots, most of which are optional.</span>
+<span class="sd">    Those slots are:</span>
+
+<span class="sd">    1. house number - mandatory</span>
+<span class="sd">    2. street, consisting of name, type (road, street, square, etc),</span>
+<span class="sd">       pre- or post- directional (N for north) - mandatory</span>
+<span class="sd">    3. suite - apartment or house number, consists of type and number (for ex. Apt #23) - optional</span>
+<span class="sd">    4. town - possibly multi-word town (for ex. San-Francisco) - optional</span>
+<span class="sd">    5. state - usually abbreviated state (for ex. CA) - optional</span>
+<span class="sd">    6. zip-code - 5-digit number with optional dash-separated 4-digits extension (for ex. 45149-3214).</span>
+<span class="sd">       Another option for zip-code is british format zip code, such as &quot;SW1W 0NY&quot;. That one consitst of</span>
+<span class="sd">       outcode and incode separated by space - optional</span>
+
+<span class="sd">    Examples of addresses and their parsing:</span>
+
+<span class="sd">    - 1599 Curabitur Rd. Bandera South Dakota 45149 -&gt;</span>
+<span class="sd">      address { house: &quot;1599&quot; street_name: &quot;Curabitur&quot; street_type: &quot;road&quot;</span>
+<span class="sd">      town: &quot;Bandera&quot; state: &quot;South Dakota&quot; zip: &quot;45149&quot;}</span>
+<span class="sd">    - 123 N Malanyuka St. SE, Apt #23 San-Francisco CA 45149-3214 -&gt;</span>
+<span class="sd">      address { house: &quot;123&quot; pre_directional: &quot;north&quot;</span>
+<span class="sd">      street_name: &quot;Malanyuka&quot; street_type: &quot;street&quot;</span>
+<span class="sd">      post_directional: &quot;south east&quot;</span>
+<span class="sd">      suite_type: &quot;apartment&quot; suite_number: &quot;23&quot;</span>
+<span class="sd">      town: &quot;San Francisco&quot; state: &quot;california&quot; zip: &quot;451493214&quot;}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AddressFst.__init__"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.AddressFst.html#en_us_normalization.production.classify.AddressFst.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;address&quot;</span><span class="p">)</span>
+
+        <span class="c1"># house number - just digits with optional dash, for ex. 123, 928-3313</span>
+        <span class="n">house_number</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">DIGIT</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">house_number</span> <span class="o">|=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">DIGIT</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">DIGIT</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">house_number</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;house: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">house_number</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># street moved to separate method given complexity</span>
+        <span class="n">street</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_street_fst</span><span class="p">()</span>
+
+        <span class="c1"># suite moved to separate method given complexity</span>
+        <span class="n">suite</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_suite_fst</span><span class="p">()</span>
+
+        <span class="c1"># town is just letters. can be multi-word, contain dash and end with coma</span>
+        <span class="n">town</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">ALPHA</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># there can be a compositional town with dash, for ex. Wilkes-Barre</span>
+        <span class="n">town</span> <span class="o">=</span> <span class="n">town</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">town</span><span class="p">)</span>
+        <span class="c1"># there can be multiple words in town name, town can optionally have comma at the end</span>
+        <span class="n">town</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">town</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">town</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># more weight for town to start from capital</span>
+        <span class="n">town</span> <span class="o">=</span> <span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">LOWER</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">|</span> <span class="n">UPPER</span><span class="p">)</span> <span class="o">+</span> <span class="n">town</span>
+        <span class="n">town</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;town: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">town</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">),</span> <span class="mf">1.1</span>
+        <span class="p">)</span>
+
+        <span class="c1"># state just comes from predefined mapping file, for ex.: CA, california</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">load_mapping</span><span class="p">(</span>
+            <span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="s2">&quot;state.tsv&quot;</span><span class="p">),</span>
+            <span class="n">key_case_agnostic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">key_with_dot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">val_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;state: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">state</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># regular zip is 5 digits</span>
+        <span class="n">zipcode</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">DIGIT</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="c1"># zip can have more 4-digit zip extension</span>
+        <span class="n">zipcode</span> <span class="o">=</span> <span class="n">zipcode</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">DIGIT</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="c1"># british zip can have letters</span>
+        <span class="n">british_zip_outcode</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">DIGIT</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">UPPER</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">british_zip_incode</span> <span class="o">=</span> <span class="n">DIGIT</span> <span class="o">+</span> <span class="n">UPPER</span> <span class="o">+</span> <span class="n">UPPER</span>
+        <span class="n">british_zip</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">british_zip_outcode</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span>
+            <span class="o">+</span> <span class="n">british_zip_incode</span>
+        <span class="p">)</span>
+        <span class="n">zipcode</span> <span class="o">|=</span> <span class="n">british_zip</span>
+        <span class="n">zipcode</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;zip: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">zipcode</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># combine house number and street</span>
+        <span class="n">house_street</span> <span class="o">=</span> <span class="n">house_number</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">street</span>
+        <span class="c1"># combine suite, house number and street. suite can go before house and street</span>
+        <span class="n">suite_house_street</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">suite</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">house_street</span>
+        <span class="p">)</span>
+        <span class="c1"># or after</span>
+        <span class="n">suite_house_street</span> <span class="o">|=</span> <span class="p">(</span>
+            <span class="n">house_street</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">suite</span>
+        <span class="p">)</span>
+        <span class="c1"># or it can be absent</span>
+        <span class="n">suite_house_street</span> <span class="o">|=</span> <span class="n">house_street</span>
+
+        <span class="n">address</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">suite_house_street</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">town</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">state</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">zipcode</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">final_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_tokens</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="n">final_graph</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_street_fst</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        street consists of name, type, pre/post direction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># street name is a sequence of letters, for ex. Aqua</span>
+        <span class="n">street_name</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">ALPHA</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># there can be a dot at the end of street, for ex. &quot;Neque.&quot;</span>
+        <span class="n">street_name</span> <span class="o">=</span> <span class="n">street_name</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+        <span class="c1"># there can be a compositional street name with dash</span>
+        <span class="n">street_name</span> <span class="o">=</span> <span class="n">street_name</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">street_name</span><span class="p">)</span>
+        <span class="c1"># there can be street name from multiple words</span>
+        <span class="n">street_name</span> <span class="o">=</span> <span class="n">street_name</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">street_name</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="c1"># having street name starting from capital letter is much more probable</span>
+        <span class="n">street_name</span> <span class="o">=</span> <span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">LOWER</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">|</span> <span class="n">UPPER</span><span class="p">)</span> <span class="o">+</span> <span class="n">street_name</span>
+        <span class="n">street_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;street_name: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">street_name</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Rd or rd. or Road, load mapping from a file</span>
+        <span class="n">street_type</span> <span class="o">=</span> <span class="n">load_mapping</span><span class="p">(</span>
+            <span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="s2">&quot;street_type.tsv&quot;</span><span class="p">),</span>
+            <span class="n">key_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">key_with_dot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">val_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">street_type</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;street_type: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">street_type</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># N or north</span>
+        <span class="n">directional</span> <span class="o">=</span> <span class="n">load_mapping</span><span class="p">(</span>
+            <span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="s2">&quot;directional.tsv&quot;</span><span class="p">),</span>
+            <span class="n">key_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">key_with_dot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">val_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">pre_directional</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;pre_directional: &quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">directional</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">post_directional</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;post_directional: &quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">directional</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># street is combination of street name and street type</span>
+        <span class="n">street</span> <span class="o">=</span> <span class="n">street_name</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">street_type</span>
+        <span class="n">street</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pre_directional</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">street</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">post_directional</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">street</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_suite_fst</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        suite - some extra information that goes after house number and street.</span>
+<span class="sd">        It could be apartment number or PO Box. suite consists of suite type and suite number.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># P.O. Box - special mark for just a post box, not actual address</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">LOWER</span> <span class="o">|</span> <span class="n">TO_LOWER</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;box&quot;</span><span class="p">)</span>
+        <span class="n">po_box</span> <span class="o">=</span> <span class="n">p</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span> <span class="o">+</span> <span class="n">o</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">box</span>
+
+        <span class="c1"># STE or APT - load possible suite types from a file</span>
+        <span class="n">suite_type</span> <span class="o">=</span> <span class="n">load_mapping</span><span class="p">(</span>
+            <span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;address&quot;</span><span class="p">,</span> <span class="s2">&quot;suite_type.tsv&quot;</span><span class="p">),</span>
+            <span class="n">key_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">key_with_dot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">val_case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">suite_type</span> <span class="o">|=</span> <span class="n">po_box</span>
+        <span class="n">suite_type</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;suite_type: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">suite_type</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># optional prefix of suite number &quot;#&quot;</span>
+        <span class="n">suite_number_prefix</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">suite_number_digit</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">DIGIT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">suite_number_alpha</span> <span class="o">=</span> <span class="n">UPPER</span> <span class="o">|</span> <span class="n">TO_UPPER</span>
+        <span class="c1"># suite number be digits, upper-case letters or both</span>
+        <span class="n">suite_number</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">suite_number_digit</span>
+            <span class="o">|</span> <span class="n">suite_number_alpha</span>
+            <span class="o">|</span> <span class="p">(</span><span class="n">suite_number_digit</span> <span class="o">+</span> <span class="n">suite_number_alpha</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">suite_number</span> <span class="o">=</span> <span class="n">suite_number_prefix</span> <span class="o">+</span> <span class="n">suite_number</span>
+        <span class="n">suite_number</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;suite_number: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">suite_number</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># combine suite type and suite number, for ex.: Ap #32</span>
+        <span class="n">suite</span> <span class="o">=</span> <span class="n">suite_type</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">suite_number</span>
+        <span class="c1"># suite can just contain number, but with lower weight</span>
+        <span class="n">suite</span> <span class="o">|=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">suite_number</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">)</span>
+        <span class="c1"># it can be in reverse order: first number then type</span>
+        <span class="n">suite</span> <span class="o">|=</span> <span class="n">suite_number</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">suite_type</span>
+        <span class="k">return</span> <span class="n">suite</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

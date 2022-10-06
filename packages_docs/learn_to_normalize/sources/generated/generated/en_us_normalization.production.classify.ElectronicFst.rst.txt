@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.ElectronicFst
+=======================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: ElectronicFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

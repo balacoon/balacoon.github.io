@@ -1,0 +1,11 @@
+en\_us\_normalization.production.verbalize.RomanFst
+===================================================
+
+.. currentmodule:: en_us_normalization.production.verbalize
+
+.. autoclass:: RomanFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_normalize.evaluation.google_data.GoogleDataIterator &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
+        <script src="../../../static/jquery.js"></script>
+        <script src="../../../static/underscore.js"></script>
+        <script src="../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../static/doctools.js"></script>
+    <script src="../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="learn_to_normalize.evaluation.google_data.ParsedUtterance" href="learn_to_normalize.evaluation.google_data.ParsedUtterance.html" />
+    <link rel="prev" title="learn_to_normalize.evaluation.google_data" href="../learn_to_normalize.evaluation.google_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../use.html">Usage</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../learn_to_normalize.evaluation.html">learn_to_normalize.evaluation</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../learn_to_normalize.evaluation.google_data.html">learn_to_normalize.evaluation.google_data</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../learn_to_normalize.evaluation.google_data.html#text-normalization-performance">Text normalization performance</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../learn_to_normalize.evaluation.google_data.html#interfaces">Interfaces</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../use.html">Usage</a> &raquo;</li>
+          <li><a href="../../learn_to_normalize.evaluation.html">learn_to_normalize.evaluation</a> &raquo;</li>
+          <li><a href="../learn_to_normalize.evaluation.google_data.html">learn_to_normalize.evaluation.google_data</a> &raquo;</li>
+      <li>learn_to_normalize.evaluation.google_data.GoogleDataIterator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../sources/generated/generated/generated/learn_to_normalize.evaluation.google_data.GoogleDataIterator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="learn-to-normalize-evaluation-google-data-googledataiterator">
+<h1>learn_to_normalize.evaluation.google_data.GoogleDataIterator<a class="headerlink" href="#learn-to-normalize-evaluation-google-data-googledataiterator" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="learn_to_normalize.evaluation.google_data.GoogleDataIterator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">learn_to_normalize.evaluation.google_data.</span></span><span class="sig-name descname"><span class="pre">GoogleDataIterator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_utterances</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../modules/learn_to_normalize/evaluation/google_data/google_data_iterator.html#GoogleDataIterator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_normalize.evaluation.google_data.GoogleDataIterator" title="Permalink to this definition"></a></dt>
+<dd><p>Data iterator over Google text normalization data
+(<a class="reference external" href="https://www.kaggle.com/datasets/richardwilliamsproat/text-normalization-for-english-russian-and-polish">https://www.kaggle.com/datasets/richardwilliamsproat/text-normalization-for-english-russian-and-polish</a>).
+Unpacked data contains multiple text files with one token per line, that looks like that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PLAIN</span>   <span class="n">Brillantaisia</span>   <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PLAIN</span>   <span class="ow">is</span>      <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PLAIN</span>   <span class="n">a</span>       <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PLAIN</span>   <span class="n">genus</span>   <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PLAIN</span>   <span class="n">of</span>      <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PLAIN</span>   <span class="n">plant</span>   <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PLAIN</span>   <span class="ow">in</span>      <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PLAIN</span>   <span class="n">family</span>  <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PLAIN</span>   <span class="n">Acanthaceae</span>     <span class="o">&lt;</span><span class="bp">self</span><span class="o">&gt;</span>
+<span class="n">PUNCT</span>   <span class="o">.</span>       <span class="n">sil</span>
+<span class="o">&lt;</span><span class="n">eos</span><span class="o">&gt;</span>   <span class="o">&lt;</span><span class="n">eos</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Data iterator parses those data files and composes pairs of unnomralized/normalized utterances.
+It needs to tackle punctuation marks and spelling.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_normalize.evaluation.google_data.GoogleDataIterator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_utterances</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../modules/learn_to_normalize/evaluation/google_data/google_data_iterator.html#GoogleDataIterator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_normalize.evaluation.google_data.GoogleDataIterator.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>constructor of google data iterator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>location: str</strong></dt><dd><p>directory with the data, for ex. downloaded and unpacked
+<a class="reference external" href="https://storage.googleapis.com/kaggle-data-sets/869240/1481083/compressed/en_with_types.tgz.zip">https://storage.googleapis.com/kaggle-data-sets/869240/1481083/compressed/en_with_types.tgz.zip</a></p>
+</dd>
+<dt><strong>subset: str</strong></dt><dd><p>subset of the data to iterate over. supported values:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>test</cite> - conventional test set of google dataset.</dt><dd><p>For english its first 100002 tokens of output-00099-of-00100</p>
+</dd>
+</dl>
+</li>
+<li><p><cite>all</cite> - iterate over all the data</p></li>
+<li><p><cite>ADDRESS</cite>, <cite>CARDINAL</cite>, … - selects utterances with specific semiotic class present</p></li>
+</ul>
+</dd>
+<dt><strong>n_utterances: int</strong></dt><dd><p>number of utterances to read from subset</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../learn_to_normalize.evaluation.google_data.html" class="btn btn-neutral float-left" title="learn_to_normalize.evaluation.google_data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="learn_to_normalize.evaluation.google_data.ParsedUtterance.html" class="btn btn-neutral float-right" title="learn_to_normalize.evaluation.google_data.ParsedUtterance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

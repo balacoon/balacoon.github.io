@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_normalize.grammar_utils.BaseFst &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
+        <script src="../static/jquery.js"></script>
+        <script src="../static/underscore.js"></script>
+        <script src="../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../static/doctools.js"></script>
+    <script src="../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Grammars" href="../grammars.html" />
+    <link rel="prev" title="learn_to_normalize.grammar_utils.GrammarLoader" href="learn_to_normalize.grammar_utils.GrammarLoader.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#grammar-utils">Grammar utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="learn_to_normalize.grammar_utils.GrammarLoader.html">learn_to_normalize.grammar_utils.GrammarLoader</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">learn_to_normalize.grammar_utils.BaseFst</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API</a> &raquo;</li>
+      <li>learn_to_normalize.grammar_utils.BaseFst</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../sources/generated/learn_to_normalize.grammar_utils.BaseFst.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="learn-to-normalize-grammar-utils-basefst">
+<h1>learn_to_normalize.grammar_utils.BaseFst<a class="headerlink" href="#learn-to-normalize-grammar-utils-basefst" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="learn_to_normalize.grammar_utils.BaseFst">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">learn_to_normalize.grammar_utils.</span></span><span class="sig-name descname"><span class="pre">BaseFst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../modules/learn_to_normalize/grammar_utils/base_fst.html#BaseFst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_normalize.grammar_utils.BaseFst" title="Permalink to this definition"></a></dt>
+<dd><p>Base class for text normalization rules. Wrapper around
+pynini FST, implements some common functions used in
+tokenization / verbalization</p>
+<p>BaseFST implements a logic of connecting transducer to itself, for ex. when it is allowed
+to connect a semiotic class to itself. It is expected that implementations of BaseFst
+would first define self._single_fst and then can call <code class="xref py py-func docutils literal notranslate"><span class="pre">connect_to_self()</span></code> multiple times.
+At usage (when merging all transducers together), one just refers to fst which returns
+multi or single fst depending on what’s available.</p>
+<p>When reusing fst in other semiotic classes you probably want to access single_fst though.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_normalize.grammar_utils.BaseFst.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../modules/learn_to_normalize/grammar_utils/base_fst.html#BaseFst.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_normalize.grammar_utils.BaseFst.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_normalize.grammar_utils.BaseFst.add_tokens">
+<span class="sig-name descname"><span class="pre">add_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pynini.FstLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pynini.FstLike</span></span></span><a class="reference internal" href="../modules/learn_to_normalize/grammar_utils/base_fst.html#BaseFst.add_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_normalize.grammar_utils.BaseFst.add_tokens" title="Permalink to this definition"></a></dt>
+<dd><p>Wraps fst into curly brackets and prepends with name of grammar.
+Used in tokenization/classification</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>fst: pynini.FstLike</strong></dt><dd><p>fst to wrap</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>fst: pynini.FstLike</dt><dd><p>fst wrapped with grammar names</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_normalize.grammar_utils.BaseFst.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../modules/learn_to_normalize/grammar_utils/base_fst.html#BaseFst.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_normalize.grammar_utils.BaseFst.apply" title="Permalink to this definition"></a></dt>
+<dd><p>helper method to apply the grammar to input text</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>text: str</strong></dt><dd><p>input string to apply transducer to</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>res: str</dt><dd><p>transduced string. In case of tokenize/classify - returns
+string parsable into protobuf. In case of verbalization,
+converts the text into spoken form</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_normalize.grammar_utils.BaseFst.connect_to_self">
+<span class="sig-name descname"><span class="pre">connect_to_self</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connector_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connector_out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connector_spaces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'any'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_closure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_closure_connector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../modules/learn_to_normalize/grammar_utils/base_fst.html#BaseFst.connect_to_self"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_normalize.grammar_utils.BaseFst.connect_to_self" title="Permalink to this definition"></a></dt>
+<dd><p>Helper function which connects self.fst to itself through intermediate connector.
+Should be applied at final stage of creating classification transducer
+For example, allows to connect cardinals with a dash, i.e. “28 - 40” which means range.
+It changes <cite>self.fst</cite> to <cite>self.fst | (self.fst + connector + self.fst)</cite></p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>connector_in: Union[str, List[str]]</strong></dt><dd><p>which connector tokens to look for. either single connector or multiple</p>
+</dd>
+<dt><strong>connector_out: Union[str, List[str]]</strong></dt><dd><p>what is the expansion of a connector. For example “-” in case of range is expanded to “to”.
+If its none, transducer just deletes strings from <cite>connector_in</cite></p>
+</dd>
+<dt><strong>connector_spaces: str</strong></dt><dd><p>defines which spaces are allowed around connector</p>
+<p><cite>any</cite> - means can be no or any number of spaces both form left and right from connector
+<cite>none_or_one</cite> - means there is no spaces around connector or one from each side, for ex. 1:2 or 1 : 2.
+<cite>none</cite> - there shouldn’t be any spaces around connector</p>
+</dd>
+<dt><strong>weight: float</strong></dt><dd><p>weight to add to multi-token branch</p>
+</dd>
+<dt><strong>to_closure: bool</strong></dt><dd><p>if True, allows multiple repetitions of (connector + fst)</p>
+</dd>
+<dt><strong>to_closure_connector: bool</strong></dt><dd><p>if True, also closure connector, so multiple occurrences of same connector between tokens are allowed</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="learn_to_normalize.grammar_utils.BaseFst.delete_tokens">
+<span class="sig-name descname"><span class="pre">delete_tokens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pynini.FstLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pynini.FstLike</span></span></span><a class="reference internal" href="../modules/learn_to_normalize/grammar_utils/base_fst.html#BaseFst.delete_tokens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#learn_to_normalize.grammar_utils.BaseFst.delete_tokens" title="Permalink to this definition"></a></dt>
+<dd><p>Removes name grammar name from string passed for verbalization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>fst: pynini.FstLike</strong></dt><dd><p>fst to remove grammar name from</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>fst: pynini.FstLike</dt><dd><p>fst without grammar name and trailing straight slash</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="learn_to_normalize.grammar_utils.GrammarLoader.html" class="btn btn-neutral float-left" title="learn_to_normalize.grammar_utils.GrammarLoader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../grammars.html" class="btn btn-neutral float-right" title="Grammars" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

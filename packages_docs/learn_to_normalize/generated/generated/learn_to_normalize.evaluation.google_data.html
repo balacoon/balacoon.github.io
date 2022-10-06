@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_normalize.evaluation.google_data &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../static/documentation_options.js"></script>
+        <script src="../../static/jquery.js"></script>
+        <script src="../../static/underscore.js"></script>
+        <script src="../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../static/doctools.js"></script>
+    <script src="../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="learn_to_normalize.evaluation.google_data.GoogleDataIterator" href="generated/learn_to_normalize.evaluation.google_data.GoogleDataIterator.html" />
+    <link rel="prev" title="learn_to_normalize.evaluation" href="../learn_to_normalize.evaluation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../use.html">Usage</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../learn_to_normalize.evaluation.html">learn_to_normalize.evaluation</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">learn_to_normalize.evaluation.google_data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#text-normalization-performance">Text normalization performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interfaces">Interfaces</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../use.html">Usage</a> &raquo;</li>
+          <li><a href="../learn_to_normalize.evaluation.html">learn_to_normalize.evaluation</a> &raquo;</li>
+      <li>learn_to_normalize.evaluation.google_data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../sources/generated/generated/learn_to_normalize.evaluation.google_data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-learn_to_normalize.evaluation.google_data">
+<span id="learn-to-normalize-evaluation-google-data"></span><h1>learn_to_normalize.evaluation.google_data<a class="headerlink" href="#module-learn_to_normalize.evaluation.google_data" title="Permalink to this heading"></a></h1>
+<p>As part of text-normalization challenge, Google released an automatically generated dataset
+of unnormalized/normalized pairs. It is obtained by running Google rule-based frontend (Kestrel)
+over Wikipedia. More info can be found in the <a class="reference external" href="https://arxiv.org/abs/1611.00068">paper</a>: “RNN Approaches to Text Normalization: A Challenge”.</p>
+<p>Download and unpack the data from Kaggle: <a class="reference external" href="https://www.kaggle.com/datasets/richardwilliamsproat/text-normalization-for-english-russian-and-polish">dataset page</a>. You will need to login, but gmail account
+can be used.</p>
+<p>This data can be used to</p>
+<ul class="simple">
+<li><p>evaluate performance of Balacoon text normalization</p></li>
+<li><p>enhance existing text normalization rules by going through mismatches</p></li>
+</ul>
+<section id="text-normalization-performance">
+<h2>Text normalization performance<a class="headerlink" href="#text-normalization-performance" title="Permalink to this heading"></a></h2>
+<p>For english, original paper reports 0.998 token-level accuracy for seq2seq model with attention and FST filter.
+Accuracy is measured on first 100002 lines of output-00099-of-00100.</p>
+<p>Balacoon performance is measured on sentence-level, since we have slightly different set of semiotic classes.
+Google data is glued back together into utterances using <cite>ParsedUtterance</cite> and fed to <cite>text_normalization</cite> package.
+We achieve 0.89 sentence-level accuracy.</p>
+<p>Vast majority of errors come from discrepancy in handling abbreviations and non-determinism in expanding numbers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Expected</span><span class="p">:</span> <span class="n">fujitsu</span> <span class="n">primergy</span> <span class="n">RX</span> <span class="n">two</span> <span class="n">five</span> <span class="n">four</span> <span class="n">o</span> <span class="n">m</span> <span class="n">one</span>
+<span class="n">Obtained</span><span class="p">:</span> <span class="n">fujitsu</span> <span class="n">primergy</span> <span class="n">RX</span> <span class="n">two</span> <span class="n">thousand</span> <span class="n">five</span> <span class="n">hundred</span> <span class="n">forty</span> <span class="n">M</span> <span class="n">one</span>
+<span class="n">Original</span><span class="p">:</span> <span class="s2">&quot;Fujitsu Primergy RX 2540 M1&quot;</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Nonetheless, some discrepancies indicate flaws of Balacoon normalization rules:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Expected: promo CD CDRDJ six seven two one seven inches R six seven two one what ya gonna do now
+Obtained: promo CD CDRDJ six thousand seven hundred twenty one seven R six thousand seven hundred twenty one what ya gonna do now
+Original: Promo CD CDRDJ 6721, 7&quot; R 6721 &quot;What Ya Gonna Do Now?&quot;
+</pre></div>
+</div>
+<p>Despite occasional inaccuracies, Balacoon rules can be used as a solid starting point to develop text-normalization
+fine-tuned for particular usecase.</p>
+</section>
+<section id="interfaces">
+<h2>Interfaces<a class="headerlink" href="#interfaces" title="Permalink to this heading"></a></h2>
+<p>Adapters that help to work with google data:</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/learn_to_normalize.evaluation.google_data.GoogleDataIterator.html#learn_to_normalize.evaluation.google_data.GoogleDataIterator" title="learn_to_normalize.evaluation.google_data.GoogleDataIterator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GoogleDataIterator</span></code></a></p></td>
+<td><p>Data iterator over Google text normalization data (<a class="reference external" href="https://www.kaggle.com/datasets/richardwilliamsproat/text-normalization-for-english-russian-and-polish">https://www.kaggle.com/datasets/richardwilliamsproat/text-normalization-for-english-russian-and-polish</a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/learn_to_normalize.evaluation.google_data.ParsedUtterance.html#learn_to_normalize.evaluation.google_data.ParsedUtterance" title="learn_to_normalize.evaluation.google_data.ParsedUtterance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParsedUtterance</span></code></a></p></td>
+<td><p>A data structure that contains unnormalized and normalized tokens parsed from a Google data file.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../learn_to_normalize.evaluation.html" class="btn btn-neutral float-left" title="learn_to_normalize.evaluation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="generated/learn_to_normalize.evaluation.google_data.GoogleDataIterator.html" class="btn btn-neutral float-right" title="learn_to_normalize.evaluation.google_data.GoogleDataIterator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

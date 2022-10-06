@@ -1,0 +1,11 @@
+en\_us\_normalization.production.classify.DateFst
+=================================================
+
+.. currentmodule:: en_us_normalization.production.classify
+
+.. autoclass:: DateFst
+    :members:
+
+    
+    .. automethod:: __init__
+    

@@ -1,0 +1,11 @@
+﻿learn\_to\_pronounce.fst.FSTTrainer
+===================================
+
+.. currentmodule:: learn_to_pronounce.fst
+
+.. autoclass:: FSTTrainer
+    :members:
+
+    
+    .. automethod:: __init__
+    

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.classify.DecimalFst &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../static/documentation_options.js"></script>
+        <script src="../../static/jquery.js"></script>
+        <script src="../../static/underscore.js"></script>
+        <script src="../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../static/doctools.js"></script>
+    <script src="../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="en_us_normalization.production.classify.ElectronicFst" href="en_us_normalization.production.classify.ElectronicFst.html" />
+    <link rel="prev" title="en_us_normalization.production.classify.DateFst" href="en_us_normalization.production.classify.DateFst.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../grammars.html">Grammars</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../en_us_normalization.production.html">en_us_normalization.production</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../en_us_normalization.production.html#classification">Classification</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../en_us_normalization.production.html#tokenize-and-classify-rules">Tokenize and classify rules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../en_us_normalization.production.html#verbalization">Verbalization</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../grammars.html">Grammars</a> &raquo;</li>
+          <li><a href="../en_us_normalization.production.html">en_us_normalization.production</a> &raquo;</li>
+      <li>en_us_normalization.production.classify.DecimalFst</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../sources/generated/generated/en_us_normalization.production.classify.DecimalFst.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="en-us-normalization-production-classify-decimalfst">
+<h1>en_us_normalization.production.classify.DecimalFst<a class="headerlink" href="#en-us-normalization-production-classify-decimalfst" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="en_us_normalization.production.classify.DecimalFst">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">en_us_normalization.production.classify.</span></span><span class="sig-name descname"><span class="pre">DecimalFst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cardinal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="en_us_normalization.production.classify.CardinalFst.html#en_us_normalization.production.classify.CardinalFst" title="en_us_normalization.production.classify.cardinal.CardinalFst"><span class="pre">CardinalFst</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../modules/en_us_normalization/production/classify/decimal.html#DecimalFst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#en_us_normalization.production.classify.DecimalFst" title="Permalink to this definition"></a></dt>
+<dd><p>Finite state transducer for classifying decimal, i.e. numbers with fractional part.
+There are 3 options to accept in fst:</p>
+<ul class="simple">
+<li><p>both integer and fractional part are present, for ex. “12.5006”</p></li>
+<li><p>only fractional part is present, for ex. “.35”</p></li>
+<li><p>only integer part is present, for ex. “12”. This one can be handled by cardinal semiotic class,
+but it is kept in decimal as well, since decimal can be a part of composite semiotic class, such as
+<cite>measure</cite></p></li>
+</ul>
+<p>Integer part of decimal - can be any cardinal or a single “0” for cases such as “0.5”
+Fractional part can be any sequence of digits after the dot</p>
+<p>Optionally decimal can have quantity after the number. There are two options:
+full form (for ex. “12 thousands”) or short version (for ex. “12k”).
+Supported quantities are stored in data/magnitudes.tsv</p>
+<p>Examples for decimals and their tagging:</p>
+<ul class="simple">
+<li><p>-12.5006 -&gt; decimal { negative: “true” integer_part: “12”  fractional_part: “5006” }</p></li>
+<li><p>13k -&gt; decimal { integer_part: “13”  quantity: “thousands” }</p></li>
+</ul>
+<p>TODO: add handling of abbreviated quantities, for ex. .5B -&gt; decimal { fractional_part: “5” quantity: “billion” }</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="en_us_normalization.production.classify.DecimalFst.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cardinal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="en_us_normalization.production.classify.CardinalFst.html#en_us_normalization.production.classify.CardinalFst" title="en_us_normalization.production.classify.cardinal.CardinalFst"><span class="pre">CardinalFst</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../modules/en_us_normalization/production/classify/decimal.html#DecimalFst.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#en_us_normalization.production.classify.DecimalFst.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>constructor for decimal fst</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cardinal: CardinalFst</strong></dt><dd><p>a cardinal fst to reuse digits fst from it. If not provided, will be initialized from scratch.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="en_us_normalization.production.classify.DecimalFst.add_quantity">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_quantity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pynini.FstLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_quantity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pynini.FstLike</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pynini.FstLike</span></span></span><a class="reference internal" href="../../modules/en_us_normalization/production/classify/decimal.html#DecimalFst.add_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#en_us_normalization.production.classify.DecimalFst.add_quantity" title="Permalink to this definition"></a></dt>
+<dd><p>helper function to add optional quantity field
+on top of the graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="en_us_normalization.production.classify.DecimalFst.get_basic_decimal_fst">
+<span class="sig-name descname"><span class="pre">get_basic_decimal_fst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../modules/en_us_normalization/production/classify/decimal.html#DecimalFst.get_basic_decimal_fst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#en_us_normalization.production.classify.DecimalFst.get_basic_decimal_fst" title="Permalink to this definition"></a></dt>
+<dd><p>getter for reusable basic decimal digits fst, that transduces “12.56” to
+<cite>integer_part: “12”  fractional_part: “56”</cite>. I.e. before adding decimal tag and without quantity.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="en_us_normalization.production.classify.DateFst.html" class="btn btn-neutral float-left" title="en_us_normalization.production.classify.DateFst" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="en_us_normalization.production.classify.ElectronicFst.html" class="btn btn-neutral float-right" title="en_us_normalization.production.classify.ElectronicFst" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

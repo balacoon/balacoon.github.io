@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>en_us_normalization.production.classify.roman &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../static/documentation_options.js"></script>
+        <script src="../../../../static/jquery.js"></script>
+        <script src="../../../../static/underscore.js"></script>
+        <script src="../../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../static/doctools.js"></script>
+    <script src="../../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>en_us_normalization.production.classify.roman</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for en_us_normalization.production.classify.roman</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+<span class="sd">Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.</span>
+<span class="sd">Copyright 2015 and onwards Google, Inc.</span>
+
+<span class="sd">tokenize and classify roman numbers</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.classify.cardinal</span> <span class="kn">import</span> <span class="n">CardinalFst</span>
+<span class="kn">from</span> <span class="nn">en_us_normalization.production.english_utils</span> <span class="kn">import</span> <span class="n">get_data_file_path</span>
+<span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.data_loader</span> <span class="kn">import</span> <span class="n">load_union</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">CHAR</span><span class="p">,</span> <span class="n">SIGMA</span><span class="p">,</span> <span class="n">insert_space</span><span class="p">,</span> <span class="n">DIGIT</span>
+
+
+<div class="viewcode-block" id="RomanFst"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.RomanFst.html#en_us_normalization.production.classify.RomanFst">[docs]</a><span class="k">class</span> <span class="nc">RomanFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finite state transducer for classifying romans (III, IV, etc).</span>
+<span class="sd">    In order to convert roman numbers, mappings from data files are used:</span>
+
+<span class="sd">    - roman/digit_teen.tsv - contains mapping for numbers from 1 to 49.</span>
+<span class="sd">    - roman/ties.tsv - contains mapping for dozens, i.e. 50, 60, ...</span>
+<span class="sd">    - roman/hunderds.tsv - contains mapping for hundreds, i.e. 100, 200, ...</span>
+
+<span class="sd">    Roman transducer reuses cardinal transducer to accept digits.</span>
+<span class="sd">    Depending on the context, specifically predecessing word, it should be possible</span>
+<span class="sd">    to define if the roman digit is cardinal or ordinal.</span>
+
+<span class="sd">    - roman/cardinal_prefixes.tsv - contains cardinal prefixes, such as &quot;Chapter&quot;</span>
+<span class="sd">    - roman/ordinal_prefixes.tsv - contains ordinal prefixes, such as &quot;George&quot;</span>
+
+<span class="sd">    In case roman number doesn&#39;t have a known prefix, i.e. standalone roman number,</span>
+<span class="sd">    it should be treated carefully. Typical mistakes:</span>
+
+<span class="sd">    - roman number can be confused with abbreviation</span>
+<span class="sd">    - roman number that consists of a single character, such as &quot;I&quot;.</span>
+<span class="sd">    - &quot;XXX&quot; - denotes pornographic materials, should have bigger weight</span>
+
+<span class="sd">    Examples of transducer input/output:</span>
+
+<span class="sd">    - IV -&gt;</span>
+<span class="sd">      roman { cardinal { count: &quot;4&quot; } }</span>
+<span class="sd">    - George I -&gt;</span>
+<span class="sd">      roman { prefix: &quot;george&quot; ordinal { order: &quot;1&quot; } }</span>
+<span class="sd">    - CHAPTER XIX -&gt;</span>
+<span class="sd">      roman { prefix: &quot;chapter&quot; cardinal { count: &quot;1&quot; } }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RomanFst.__init__"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.RomanFst.html#en_us_normalization.production.classify.RomanFst.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cardinal</span><span class="p">:</span> <span class="n">CardinalFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        cosntructor for roman numbers transducer</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cardinal: CardinalFst</span>
+<span class="sd">            transducer for cardinal numbers to reuse.</span>
+<span class="sd">            if not provided, will be created from scratch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;roman&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cardinal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cardinal</span> <span class="o">=</span> <span class="n">CardinalFst</span><span class="p">()</span>
+
+        <span class="n">digit_teen</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">string_file</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;roman&quot;</span><span class="p">,</span> <span class="s2">&quot;digit_teen.tsv&quot;</span><span class="p">))</span>
+        <span class="n">ties</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">string_file</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;roman&quot;</span><span class="p">,</span> <span class="s2">&quot;ties.tsv&quot;</span><span class="p">))</span>
+        <span class="n">hundreds</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">string_file</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;roman&quot;</span><span class="p">,</span> <span class="s2">&quot;hundreds.tsv&quot;</span><span class="p">))</span>
+
+        <span class="c1"># any roman number</span>
+        <span class="n">roman</span> <span class="o">=</span> <span class="n">digit_teen</span> <span class="o">|</span> <span class="n">ties</span>
+        <span class="n">roman</span> <span class="o">|=</span> <span class="n">ties</span> <span class="o">+</span> <span class="n">insert_space</span> <span class="o">+</span> <span class="n">digit_teen</span>
+        <span class="n">roman</span> <span class="o">|=</span> <span class="p">(</span>
+            <span class="n">hundreds</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">insert_space</span> <span class="o">+</span> <span class="n">ties</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">insert_space</span> <span class="o">+</span> <span class="n">digit_teen</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">roman</span> <span class="o">=</span> <span class="n">roman</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cdrewrite</span><span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;00 &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">SIGMA</span>
+        <span class="p">)</span>  <span class="c1"># remove zeros introduced by &quot;hundreds&quot;</span>
+        <span class="n">roman</span> <span class="o">=</span> <span class="n">roman</span> <span class="o">@</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cdrewrite</span><span class="p">(</span>
+            <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;0 &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">SIGMA</span>
+        <span class="p">)</span>  <span class="c1"># removes zero introduces by &quot;ties&quot;</span>
+
+        <span class="n">cardinal_roman_prefix</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_prefixes</span><span class="p">(</span><span class="s2">&quot;cardinal_prefixes.tsv&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">roman</span> <span class="o">@</span> <span class="n">cardinal</span><span class="o">.</span><span class="n">single_fst</span>
+        <span class="p">)</span>
+        <span class="c1"># make ordinal from roman. allow only values &lt; 10</span>
+        <span class="n">ordinal_numbers</span> <span class="o">=</span> <span class="n">roman</span> <span class="o">@</span> <span class="n">DIGIT</span>
+        <span class="n">ordinal_numbers</span> <span class="o">=</span> <span class="n">ordinal_numbers</span> <span class="o">@</span> <span class="n">cardinal</span><span class="o">.</span><span class="n">get_digits_fst</span><span class="p">()</span>
+        <span class="n">ordinal_roman</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;ordinal { order: &quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">ordinal_numbers</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot; }&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ordinal_roman_prefix</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_prefixes</span><span class="p">(</span><span class="s2">&quot;ordinal_prefixes.tsv&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">ordinal_roman</span>
+        <span class="p">)</span>
+
+        <span class="c1"># stand alone roman - should have at least two digits, should be digits/teens at most</span>
+        <span class="n">standalone_roman</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">CHAR</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">@</span> <span class="n">digit_teen</span>
+        <span class="n">standalone_roman</span> <span class="o">=</span> <span class="n">standalone_roman</span> <span class="o">@</span> <span class="n">cardinal</span><span class="o">.</span><span class="n">single_fst</span>
+
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">standalone_roman</span> <span class="o">|</span> <span class="n">ordinal_roman_prefix</span> <span class="o">|</span> <span class="n">cardinal_roman_prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_tokens</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_to_self</span><span class="p">(</span><span class="n">connector_in</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">connector_out</span><span class="o">=</span><span class="s2">&quot;to&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_load_prefixes</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        helper function to load prefixes of roman numbers from a file</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name: str</span>
+<span class="sd">            name of data file in roman data directory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prefixes</span> <span class="o">=</span> <span class="n">load_union</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;roman&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="n">case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;prefix: &quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">prefixes</span>
+            <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>learn_to_normalize.grammar_utils.grammar_loader &mdash; learn_to_normalize 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
+        <script src="../../../static/jquery.js"></script>
+        <script src="../../../static/underscore.js"></script>
+        <script src="../../../static/sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../static/doctools.js"></script>
+    <script src="../../../static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> learn_to_normalize
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../grammars.html">Grammars</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">learn_to_normalize</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>learn_to_normalize.grammar_utils.grammar_loader</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for learn_to_normalize.grammar_utils.grammar_loader</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Copyright 2022 Balacoon</span>
+
+<span class="sd">class that loads grammars from directory with</span>
+<span class="sd">normalization rules.</span>
+<span class="sd">directory should have specific structure.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">pynini</span>
+<span class="kn">from</span> <span class="nn">pynini.export</span> <span class="kn">import</span> <span class="n">grm</span>
+
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
+
+
+<div class="viewcode-block" id="GrammarLoader"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.GrammarLoader.html#learn_to_normalize.grammar_utils.GrammarLoader">[docs]</a><span class="k">class</span> <span class="nc">GrammarLoader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads normalization grammars from directory of specific structure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">NORMALIZATION_MODES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;classify&quot;</span><span class="p">,</span> <span class="s2">&quot;verbalize&quot;</span><span class="p">]</span>
+    <span class="n">CONFIGURATION_NAMES</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;tokenizer.ascii_proto&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;verbalizer.ascii_proto&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;verbalizer_serialization_spec.ascii_proto&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+<div class="viewcode-block" id="GrammarLoader.__init__"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.GrammarLoader.html#learn_to_normalize.grammar_utils.GrammarLoader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammars_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># all imports within grammars repo are done relative to parent dir of grammar repo.</span>
+        <span class="c1"># so &lt;grammar_repo&gt;/../ should be added to PYTHONPATH and suffix stored to be used</span>
+        <span class="c1"># during grammar loading. First &lt;grammar_repo&gt; directory should be identified</span>
+        <span class="n">grammars_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">grammars_dir</span><span class="p">)</span>
+        <span class="c1"># find the repo location</span>
+        <span class="n">repo_dir</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s2">&quot;cd </span><span class="si">{}</span><span class="s2"> &amp;&amp; git rev-parse --show-toplevel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grammars_dir</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="c1"># add to PYTHONPATH directory one level higher than repo</span>
+        <span class="n">above_repo_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">,</span> <span class="s2">&quot;..&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">above_repo_dir</span><span class="p">)</span>
+        <span class="c1"># find out location of rules inside of grammars repo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_module_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">grammars_dir</span><span class="p">,</span> <span class="n">above_repo_dir</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grammars_dir</span> <span class="o">=</span> <span class="n">grammars_dir</span>
+
+        <span class="c1"># test that there is minimal entry points for export</span>
+        <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">NORMALIZATION_MODES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">grammars_dir</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">mode</span> <span class="o">+</span> <span class="s2">&quot;.py&quot;</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Grammars directory is missing entry point: </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">.py&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">mode</span><span class="p">,</span> <span class="n">mode</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">for</span> <span class="n">config_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">CONFIGURATION_NAMES</span><span class="p">:</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">grammars_dir</span><span class="p">,</span> <span class="s2">&quot;configs&quot;</span><span class="p">,</span> <span class="n">config_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">config_path</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Grammars directory is missing text_normalization proto config: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">config_path</span>
+                    <span class="p">)</span>
+                <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GrammarLoader.get_grammar"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.GrammarLoader.html#learn_to_normalize.grammar_utils.GrammarLoader.get_grammar">[docs]</a>    <span class="k">def</span> <span class="nf">get_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseFst</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads grammar from grammar dir based on module name and class name of the grammar</span>
+
+<span class="sd">        Paramaters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        module_str: str</span>
+<span class="sd">            module to load, for ex. classify.cardinal</span>
+<span class="sd">        class_name: str</span>
+<span class="sd">            fst class to load from the module, for ex. CardinalFst</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        grammar: BaseFST</span>
+<span class="sd">            grammar loaded by the name and initialized</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">grammar_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_grammars_dir</span><span class="p">,</span> <span class="n">module_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.py&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">grammar_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Cant get grammar from </span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2"> doesn&#39;t exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">module_str</span><span class="p">,</span> <span class="n">grammar_path</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_module_prefix</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">module_str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> doesn&#39;t have </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">grammar_path</span><span class="p">,</span> <span class="n">class_name</span><span class="p">))</span>
+        <span class="n">grammar_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+        <span class="n">grammar</span> <span class="o">=</span> <span class="n">grammar_class</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">grammar</span><span class="p">,</span> <span class="n">BaseFst</span>
+        <span class="p">),</span> <span class="s2">&quot;loaded grammar does not inherit base grammar&quot;</span>
+        <span class="k">return</span> <span class="n">grammar</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_serialize_fst</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span><span class="p">,</span> <span class="n">rule_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports FAR, reads exported far as bytes.</span>
+<span class="sd">        TODO: check if possible to serialize without saving to disk</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fst: pynini.FstLike</span>
+<span class="sd">            fst of a grammar to serialize</span>
+<span class="sd">        rule_name: str</span>
+<span class="sd">            name under which to store fst in FAR</span>
+<span class="sd">        out_path: str</span>
+<span class="sd">            path to export FAR to during serialization</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        res: bytes</span>
+<span class="sd">            serialized fst as bytes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">exporter</span> <span class="o">=</span> <span class="n">grm</span><span class="o">.</span><span class="n">Exporter</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span>
+        <span class="n">exporter</span><span class="p">[</span><span class="n">rule_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fst</span>
+        <span class="n">exporter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="GrammarLoader.get_verbalizer"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.GrammarLoader.html#learn_to_normalize.grammar_utils.GrammarLoader.get_verbalizer">[docs]</a>    <span class="k">def</span> <span class="nf">get_verbalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports verbalizer, stores FAR on disk, returns serialized FAR</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        work_dir: str</span>
+<span class="sd">            directory to store verbalizer FAR to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        res: bytes</span>
+<span class="sd">            serialized verbalizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">verb_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;verbalizer.far&quot;</span><span class="p">)</span>
+        <span class="n">verb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_grammar</span><span class="p">(</span><span class="s2">&quot;verbalize.verbalize&quot;</span><span class="p">,</span> <span class="s2">&quot;VerbalizeFst&quot;</span><span class="p">)</span>
+        <span class="c1"># should match rule name in configs/verbalizer.ascii_proto</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_fst</span><span class="p">(</span><span class="n">verb</span><span class="o">.</span><span class="n">fst</span><span class="p">,</span> <span class="s2">&quot;ALL&quot;</span><span class="p">,</span> <span class="n">verb_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GrammarLoader.get_tokenizer"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.GrammarLoader.html#learn_to_normalize.grammar_utils.GrammarLoader.get_tokenizer">[docs]</a>    <span class="k">def</span> <span class="nf">get_tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exports tokenizer/classifier, stores FAR on disk, returns serialized FAR</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        work_dir: str</span>
+<span class="sd">            directory to store tokenizer FAR to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        res: bytes</span>
+<span class="sd">            serialized tokenizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">classify_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s2">&quot;tokenizer.far&quot;</span><span class="p">)</span>
+        <span class="n">classify</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_grammar</span><span class="p">(</span><span class="s2">&quot;classify.classify&quot;</span><span class="p">,</span> <span class="s2">&quot;ClassifyFst&quot;</span><span class="p">)</span>
+        <span class="c1"># should match rule name in configs/tokenizer.ascii_proto</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_fst</span><span class="p">(</span><span class="n">classify</span><span class="o">.</span><span class="n">fst</span><span class="p">,</span> <span class="s2">&quot;TOKENIZE_AND_CLASSIFY&quot;</span><span class="p">,</span> <span class="n">classify_path</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_read_text_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads file from given path. Helper function to read config files</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path: str</span>
+<span class="sd">            path to read from</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        content: str</span>
+<span class="sd">            read content of the file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">content</span>
+
+<div class="viewcode-block" id="GrammarLoader.get_configs"><a class="viewcode-back" href="../../../generated/learn_to_normalize.grammar_utils.GrammarLoader.html#learn_to_normalize.grammar_utils.GrammarLoader.get_configs">[docs]</a>    <span class="k">def</span> <span class="nf">get_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads configurations required by text_normalization</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        configs: Tuple[str, str, str]</span>
+<span class="sd">            Loaded proto configurations as strings.</span>
+<span class="sd">            There are 3 configurations required by text_normalization package:</span>
+<span class="sd">            tokenizer configuration - defines name of the grammar and main rule</span>
+<span class="sd">            verbalizer configuration - defines name of grammar and main rule</span>
+<span class="sd">            verbalizer serialization specification - fields of tokenized semiotic classes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_text_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grammars_dir</span><span class="p">,</span> <span class="s2">&quot;configs&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">CONFIGURATION_NAMES</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">configs</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Balacoon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

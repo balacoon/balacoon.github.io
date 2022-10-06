@@ -1,0 +1,11 @@
+﻿learn\_to\_pronounce.addon.AddonManager
+=======================================
+
+.. currentmodule:: learn_to_pronounce.addon
+
+.. autoclass:: AddonManager
+    :members:
+
+    
+    .. automethod:: __init__
+    

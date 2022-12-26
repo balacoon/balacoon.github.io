@@ -1,21 +1,18 @@
 ---
-title: "Adjusting Text Normalization"
+title: "Text Normalization"
 permalink: /use/frontend/learn_to_normalize
 ---
 
 **Frontend** utilizes pre-packed grammars,
-to expand written text into a spoken form.
+to expand written text into the spoken form.
 [Pynini](https://www.openfst.org/twiki/bin/view/GRM/Pynini)
 is used to write grammars that tokenize input text,
 classify tokens into semiotic classes and verbalize them.
 
-You can see how addons with text-normalizatio rules are built
-or even build your own using **learn_to_normalize**
+Use **learn_to_normalize**
 ([github](https://github.com/balacoon/learn_to_normalize), 
-[documentation](../../../packages_docs/learn_to_normalize/index.html)) package.
-Text normalization rules are stored in separate repositories:
+[documentation](../../../packages_docs/learn_to_normalize/index.html))
+package to adjust text normalization rules and create custom addons for your needs.
+We store text normalization rules in separate repositories, one per locale:
 
 - [english](https://github.com/balacoon/en_us_normalization)
-
-Following the documentation you can adjust text normalization rules and pack them
-to your custom addon. Pull requests are very welcome.

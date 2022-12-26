@@ -81,7 +81,7 @@
 
 <span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
 <span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.data_loader</span> <span class="kn">import</span> <span class="n">load_union</span><span class="p">,</span> <span class="n">load_csv</span>
-<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">ALPHA</span><span class="p">,</span> <span class="n">TO_LOWER</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">ALPHA</span><span class="p">,</span> <span class="n">TO_LOWER</span><span class="p">,</span> <span class="n">TO_UPPER</span>
 
 
 <div class="viewcode-block" id="WordFst"><a class="viewcode-back" href="../../../../generated/generated/en_us_normalization.production.classify.WordFst.html#en_us_normalization.production.classify.WordFst">[docs]</a><span class="k">class</span> <span class="nc">WordFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
@@ -113,11 +113,12 @@
         <span class="c1"># just alpha characters that can go directly to pronunciation generation</span>
         <span class="n">unicode_char</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">string_file</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;unicode_chars.tsv&quot;</span><span class="p">))</span>
         <span class="n">apostrophe</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="n">hyphen</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
         <span class="c1"># regular words</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">ALPHA</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span> <span class="o">|</span> <span class="n">unicode_char</span> <span class="o">|</span> <span class="n">TO_LOWER</span>
         <span class="c1"># word with optional apostroph inside</span>
-        <span class="n">word</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">alpha</span> <span class="o">|</span> <span class="n">apostrophe</span><span class="p">)</span> <span class="o">+</span> <span class="n">alpha</span>
+        <span class="n">word</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">alpha</span> <span class="o">|</span> <span class="n">apostrophe</span> <span class="o">|</span> <span class="n">hyphen</span><span class="p">)</span> <span class="o">+</span> <span class="n">alpha</span>
         <span class="c1"># allow also single letter words</span>
         <span class="n">word</span> <span class="o">|=</span> <span class="n">alpha</span>
 
@@ -133,14 +134,8 @@
         <span class="c1"># allow apostrophe in front of the word if word is from the list</span>
         <span class="n">shortened_words</span> <span class="o">=</span> <span class="n">load_union</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;front_apostrophe.tsv&quot;</span><span class="p">),</span> <span class="n">case_agnostic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">word</span> <span class="o">|=</span> <span class="p">(</span><span class="n">apostrophe</span> <span class="o">+</span> <span class="n">shortened_words</span><span class="p">)</span>
-
         <span class="n">word</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;name: &quot;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">word</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="c1"># allow some symbols inside of words that are simply deleted</span>
-        <span class="n">in_symbols</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">|/</span><span class="se">\\</span><span class="s2">%!~_$()&#39;.,&quot;</span>
-        <span class="n">in_symbols_lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">in_symbols</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">connect_to_self</span><span class="p">(</span><span class="n">connector_in</span><span class="o">=</span><span class="n">in_symbols_lst</span><span class="p">,</span> <span class="n">connector_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connector_spaces</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
-                             <span class="n">to_closure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">to_closure_connector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_single_fst</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>

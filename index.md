@@ -8,17 +8,16 @@ author_profile: true
 
 Balacoon is a set of tools and resources for Text-to-Speech (TTS).
 We focus on developing easy-to-use packages with minimal dependencies
-and pre-packed models to be used in production or research.
+and pre-packed models for production or research. 
+There are three main directions we look into:
 
-There are three main directions, that are pursued:
-
-- speech synthesis solution that you can just plug into your own project,
-  when you need an artificial speech. This can be a replacement for costly
-  cloud services or off-the-shelf starting point in your pet project.
+- Speech synthesis solution that you can plug into your work
+  when you need artificial speech. Balacoon can replace costly
+  cloud services or be an off-the-shelf starting point in your project.
 - TTS building blocks that might be helpful in data processing for your
-  own research. For example, you can fully rely on Balacoon text processing,
-  while developing your own speech synthesis models. This can save time,
+  research. For example, you can rely on Balacoon text analysis
+  while developing speech synthesis models. It can save time,
   enhance reproducibility and simplify the workflow.
-- Proprietary solutions that wrap speech technologies into products.
-  Unfortunately you won't be able to use those on your own, but check out demos
-  and reach out if you have any questions, inquires.
+- Disruptive technologies that aim to introduce new use cases
+  and applications for speech generation. Due to high computational costs,
+  we provide them as services.

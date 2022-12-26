@@ -82,7 +82,7 @@
 <span class="kn">from</span> <span class="nn">pynini.lib</span> <span class="kn">import</span> <span class="n">pynutil</span>
 
 <span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.base_fst</span> <span class="kn">import</span> <span class="n">BaseFst</span>
-<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">delete_space</span><span class="p">,</span> <span class="n">insert_space</span><span class="p">,</span> <span class="n">wrap_token</span>
+<span class="kn">from</span> <span class="nn">learn_to_normalize.grammar_utils.shortcuts</span> <span class="kn">import</span> <span class="n">delete_space</span><span class="p">,</span> <span class="n">insert_space</span>
 
 
 <div class="viewcode-block" id="AttachedTokensFst"><a class="viewcode-back" href="../../../../../generated/generated/en_us_normalization.production.classify.multi_token.AttachedTokensFst.html#en_us_normalization.production.classify.multi_token.AttachedTokensFst">[docs]</a><span class="k">class</span> <span class="nc">AttachedTokensFst</span><span class="p">(</span><span class="n">BaseFst</span><span class="p">):</span>
@@ -106,8 +106,6 @@
         <span class="n">cardinal</span><span class="p">:</span> <span class="n">CardinalFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">abbreviation</span><span class="p">:</span> <span class="n">AbbreviationFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">word</span><span class="p">:</span> <span class="n">WordFst</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">left_punct</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">right_punct</span><span class="p">:</span> <span class="n">pynini</span><span class="o">.</span><span class="n">FstLike</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        constructor of transducer handling attached (merged) tokens</span>
@@ -120,10 +118,6 @@
 <span class="sd">            abbreviation to reuse</span>
 <span class="sd">        word: WordFst</span>
 <span class="sd">            word to reuse</span>
-<span class="sd">        left_punct: pynini.FstLike</span>
-<span class="sd">            punctuation to the left of multi-token</span>
-<span class="sd">        right_punct: pynini.FstLike</span>
-<span class="sd">            punctuation to the right of multi-token</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;score&quot;</span><span class="p">)</span>
 
@@ -135,55 +129,39 @@
             <span class="n">abbreviation</span> <span class="o">=</span> <span class="n">AbbreviationFst</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">word</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">word</span> <span class="o">=</span> <span class="n">WordFst</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">left_punct</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">right_punct</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">left_punct</span><span class="p">,</span> <span class="n">right_punct</span> <span class="o">=</span> <span class="n">get_punctuation_rules</span><span class="p">()</span>
 
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">string_file</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;symbols.tsv&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
         <span class="c1"># penalize adding more symbols, so if there is another option (for example punctuation) - go with that</span>
         <span class="n">multiple_symbols</span> <span class="o">=</span> <span class="n">symbols</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">insert_space</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">symbols</span><span class="p">)</span>
-        <span class="n">delete_hyphen</span> <span class="o">=</span> <span class="n">insert_space</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-        <span class="n">optional_delete_hyphen</span> <span class="o">=</span> <span class="n">insert_space</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span>
-            <span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
-        <span class="p">)</span>
+        <span class="n">multiple_symbols</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;name: </span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">multiple_symbols</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">cross_hyphen</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; } tokens { &quot;</span><span class="p">)</span>
+        <span class="n">optional_cross_hyphen</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot; } tokens { &quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">closure</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
         <span class="c1"># boundary between abbreviation and word is not obvious, so expecting dash as a separator</span>
-        <span class="n">abbr_plus_word</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">abbreviation</span><span class="o">.</span><span class="n">fst</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">delete_hyphen</span>
-            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">abbr_plus_word</span> <span class="o">=</span> <span class="n">abbreviation</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">cross_hyphen</span> <span class="o">+</span> <span class="n">word</span><span class="o">.</span><span class="n">fst</span>
+
         <span class="c1"># boundary between abbreviation and number is obvious, so dash is optional</span>
-        <span class="n">abbr_plus_number</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">abbreviation</span><span class="o">.</span><span class="n">fst</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">optional_delete_hyphen</span>
-            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">cardinal</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">abbr_plus_number</span> <span class="o">=</span> <span class="n">abbreviation</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">optional_cross_hyphen</span> <span class="o">+</span> <span class="n">cardinal</span><span class="o">.</span><span class="n">fst</span>
+
+        <span class="c1"># try to avoid situations when string with all consonants is classified as word</span>
+        <span class="n">word_or_abbr</span> <span class="o">=</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">fst</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span> <span class="o">|</span> <span class="n">abbreviation</span><span class="o">.</span><span class="n">fst</span>
+
         <span class="c1"># boundary between word and number is also obvious</span>
-        <span class="n">word_plus_number</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">word</span><span class="o">.</span><span class="n">fst</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">optional_delete_hyphen</span>
-            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">cardinal</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">word_plus_number</span> <span class="o">=</span> <span class="n">word_or_abbr</span> <span class="o">+</span> <span class="n">optional_cross_hyphen</span> <span class="o">+</span> <span class="n">cardinal</span><span class="o">.</span><span class="n">fst</span>
+        <span class="n">number_plus_word</span> <span class="o">=</span> <span class="n">cardinal</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">optional_cross_hyphen</span> <span class="o">+</span> <span class="n">word_or_abbr</span>
+
         <span class="c1"># boundary between word and symbols is obvious</span>
-        <span class="n">word_plus_symbols</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">word</span><span class="o">.</span><span class="n">fst</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">optional_delete_hyphen</span>
-            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;name: </span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">multiple_symbols</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="c1"># same the other way around</span>
-        <span class="n">symbols_plus_word</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;name: </span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">multiple_symbols</span> <span class="o">+</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">))</span>
-            <span class="o">+</span> <span class="n">optional_delete_hyphen</span>
-            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="n">hashtag</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">wrap_token</span><span class="p">(</span><span class="n">left_punct</span> <span class="o">+</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="s2">&quot;name: </span><span class="se">\&quot;</span><span class="s2">hashtag</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">))</span>
-            <span class="o">+</span> <span class="n">insert_space</span>
-            <span class="o">+</span> <span class="n">wrap_token</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">fst</span> <span class="o">+</span> <span class="n">right_punct</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">word_plus_symbols</span> <span class="o">=</span> <span class="n">word_or_abbr</span> <span class="o">+</span> <span class="n">optional_cross_hyphen</span> <span class="o">+</span> <span class="n">multiple_symbols</span>
+        <span class="n">symbols_plus_word</span> <span class="o">=</span> <span class="n">multiple_symbols</span> <span class="o">+</span> <span class="n">optional_cross_hyphen</span> <span class="o">+</span> <span class="n">word_or_abbr</span>
+
+        <span class="c1"># special case for insta ;)</span>
+        <span class="n">hashtag</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="s2">&quot;name: </span><span class="se">\&quot;</span><span class="s2">hashtag</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">insert_space</span> <span class="o">+</span> <span class="n">word_or_abbr</span>
+
         <span class="n">graph</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">abbr_plus_word</span>
             <span class="o">|</span> <span class="n">abbr_plus_number</span>
             <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">word_plus_number</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+            <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">number_plus_word</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
             <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">word_plus_symbols</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>  <span class="c1"># regular word weight is 10, avoid shadowing word + punct</span>
             <span class="o">|</span> <span class="n">pynutil</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">symbols_plus_word</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>  <span class="c1"># regular word weight is 10, avoid shadowing punct + word</span>
             <span class="o">|</span> <span class="n">hashtag</span>  <span class="c1"># hashtag is overshadowed by symbols_plus_word but has higher weight</span>

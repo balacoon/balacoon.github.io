@@ -8,16 +8,14 @@ main:
 
 sidebar-use:
   - title: "TTS"
-    url: /use/tts
+    children:
+      - title: "As a package"
+        url: /use/tts/package
   - title: "Frontend"
     children:
       - title: "Text processing in TTS"
         url: /use/frontend
-      - title: "Adjusting pronunciation"
+      - title: "Pronunciation"
         url: /use/frontend/learn_to_pronounce
-      - title: "Adjusting text normalization"
+      - title: "Text Normalization"
         url: /use/frontend/learn_to_normalize
-  - title: "Backend"
-    children:
-      - title: "Vocoding"
-        url: /use/backend/vocoding

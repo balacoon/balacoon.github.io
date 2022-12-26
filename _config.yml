@@ -59,7 +59,6 @@ plugins:
 author:
   name   : "Balacoon"
   avatar : "/assets/images/logo.png"
-  bio    : "Racoon able to chat"
   links:
     - label: "e-mail"
       icon: "fas fa-fw fa-envelope-square"

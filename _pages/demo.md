@@ -4,41 +4,30 @@ title: "Demo"
 toc: true
 ---
 
-Before actually using Balacoon, you can check how it works.
+Here you can listen to examples of what Balacoon has to offer.
 
 # Text-to-Speech (TTS)
 
 **balacoon_tts** [interactive demo](https://huggingface.co/spaces/balacoon/tts)
 is hosted with amazing **Huggingface spaces**. Poke around and check naturalness
-of generated speech. Latency and throughput is not descriptive though.
+of generated speech.
 
-# Voice Conversion (VC)
+# Disruptive technologies
 
-As one of proprietary products we offer voice conversion - taking the recording of speech
-and changing persona and inflection in it, while maintaining the message spoken.
-There are two flavors that voice conversion come in.
-*Interactive demo of the technology is provided upon request.*
+Neural Text-to-Speech delivers new levels of naturalness as well as new applications.
+For instance, we can alternate different speech factors, such as speaker identity,
+expressivity, or recording conditions. In Balacoon, we investigate newly emerged techniques,
+exploring their potential. In case of broader interest, we plan to ship them as services.
 
-## Any-to-Many VC
+## Voice Conversion
 
-This allows to convert recording with any voice (for ex. yours), that was not seeing during
-the training of the system to an audio by a speaker from pre-defined list.
-Since target speaker is seeing during training, it allows to learn not only timbre
-of speech but also prosodical characteristics.
+This technology lets to change **who** is speaking in the audio.
+We just need a short example of how the target voice sounds.
+Voice Conversion has been known for decades now. But only recently,
+it became possible to do it for arbitrary input audio:
+for speakers unseen at the training stage of a system.
 
-Teaser:
-{% include embed-audio.html src="/assets/demo_audio/vc/trump.mp3" name="Source audio from Donald Trump:" %}
-{% include embed-audio.html src="/assets/demo_audio/vc/trump2obama_a2m.mp3" name="Same audio, converted to Barack Obama:" %}
-
-## Any-to-Any VC
-
-As in Any-to-Many, the voice identity in the input recording can be any.
-The voice identity in the output audio is extracted from provided template recording.
-I.e. you provide an audio you want to convert, recording of the person you want to mimic,
-and you get the result where message and infliction are derived from the first audio,
-but voice identity is borrowed from the second.
-
-Teaser:
+Example:
 {% include embed-audio.html src="/assets/demo_audio/vc/meryl_streep.mp3" name="Source audio from Meryl Streep:" %}
 {% include embed-audio.html src="/assets/demo_audio/vc/kratos_short.mp3" name="God of War, to borrow voice from:" %}
 {% include embed-audio.html src="/assets/demo_audio/vc/streep2kratos_a2a.mp3" name="Meryl speaking as God of War:" %}

@@ -1,6 +1,6 @@
 ---
 title: "en-US abbreviation detection"
-last_modified_at: 2023-03-15T16:20:02-05:00
+last_modified_at: 2023-01-15T16:20:02-05:00
 categories:
   - Blog
 tags:

@@ -1,10 +1,11 @@
 ---
 title: "Balacoon phonemeset"
-last_modified_at: 2023-03-16T16:20:02-05:00
+last_modified_at: 2023-01-16T16:20:02-05:00
 categories:
   - Blog
 tags:
   - frontend
+  - pronunciation
 ---
 
 Text-to-speech assumes the implicit or explicit conversion of input text into a sequence of sounds to be pronounced. Defining a set of all possible sounds (or phonemes) for the language can spark quite a debate. Fortunately, neural speech synthesis is quite flexible and can tolerate almost any annotation as long as it is consistent. This post describes how the phoneme set for the Balacoon Frontend is composed.

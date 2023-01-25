@@ -117,16 +117,3 @@ utterance.save("utterance1.pb")
 # later on you can load it and do same operations as above
 restored = LinguisticUtterance.load("utterance1.pb")
 ```
-
-## Alternatives
-
-Nowadays, it is common to use [Phonemizer](https://github.com/bootphon/phonemizer) as a Frontend.
-Phonemizer is a wrapper around academic speech synthesis toolkits: 
-[eSpeak](https://github.com/espeak-ng/espeak-ng) and [Festival](https://github.com/festvox/festival).
-It supports numerous locales out of the box and has broad adoption in a speech community. 
-However, text normalization and pronunciation generation methods that toolkits implement need to be updated. 
-
-Balacoon provides a set of rules for text normalization that is easy to maintain and expand,
-as well as modern statistical approaches to pronunciation generation. 
-All the frontend resources are public in the hope that users can tweak the Frontend
-for a particular task or continuously improve it upon long tail of errors.

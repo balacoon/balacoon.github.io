@@ -89,8 +89,11 @@
 <ol class="arabic simple" start="3">
 <li><p>get pronunciation resources. Adjust those if needed, but don’t
 forget to share changes as a contribution. In order to promote
-multi-linguality, it is preferable to use international phonemesets
-(IPA, X-SAMPA).</p></li>
+multi-linguality, a unified phoneme set is used by the balacoon.
+You can find more information on decisions made in the <a class="reference external" href="https://balacoon.com/blog/balacoon_phonemeset/">post</a>.
+If you want to build a pronunciation generation for a new lexicon,
+you would need to perform mapping into Balacoon unified phoneme set.
+Check info on <a class="reference external" href="https://github.com/balacoon/en_us_pronunciation/blob/f683b7c4d9ad8baad048b3ff8bb9f8e900ccab43/cmudict/README.md">mapping</a> of CMUDict as an example.</p></li>
 </ol>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># resources are stored as submodules, pick one you need</span>
 <span class="c1"># from resources dir</span>
@@ -128,7 +131,6 @@ obtained artifacts.</p></li>
 <span class="n">demo_pronounce</span> <span class="o">--</span><span class="n">addon</span> <span class="n">en_us_pronunciation</span><span class="o">.</span><span class="n">addon</span> <span class="p">[</span><span class="o">--</span><span class="n">spelling</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Results of pronunciation generation models evaluation can be found <a class="reference internal" href="results.html"><span class="doc">here</span></a></p>
 </section>
 
 

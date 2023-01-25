@@ -112,7 +112,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">)</span>
         <span class="c1"># just alpha characters that can go directly to pronunciation generation</span>
         <span class="n">unicode_char</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">string_file</span><span class="p">(</span><span class="n">get_data_file_path</span><span class="p">(</span><span class="s2">&quot;unicode_chars.tsv&quot;</span><span class="p">))</span>
-        <span class="n">apostrophe</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="n">apostrophe</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">pynini</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="s2">&quot;’&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
         <span class="n">hyphen</span> <span class="o">=</span> <span class="n">pynini</span><span class="o">.</span><span class="n">accep</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
         <span class="c1"># regular words</span>

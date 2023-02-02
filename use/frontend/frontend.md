@@ -104,7 +104,8 @@ is associated with an integer. There is an access method that allows
 getting encoded sequences directly:
 
 ```python
-tts_input = utterance.get_encoded_phonemes()
+phonemes = utterance.encode()
+stresss = utterance.encode_stress()
 ```
 
 ### Store/Load the utterance
@@ -117,3 +118,29 @@ utterance.save("utterance1.pb")
 # later on you can load it and do same operations as above
 restored = LinguisticUtterance.load("utterance1.pb")
 ```
+
+## Fallback to eSpeak
+
+In the event that the Balacoon Frontend does not support a particular locale,
+there is a possibility to use eSpeak as a secondary option.
+eSpeak has built-in support for a large number of locales and can serve as a viable alternative.
+
+To use eSpeak, download the addon:
+
+```bash
+wget https://huggingface.co/balacoon/frontend/resolve/main/espeak_frontend.addon
+```
+
+And provide the path during initialization:
+
+```python
+frontend = Frontend("path/to/espeak_frontend.addon", "en_us", "espeak")
+```
+
+The rest of the usage is the same as the default Balacoon Frontend.
+However, eSpeak can only be used for pronunciation extraction.
+Tokenization and normalization are not available through eSpeak and will be mocked for compatibility purposes.
+
+eSpeak phonemes are mapped to the unified Balacoon phoneme set.
+Not all locales have a mapping yet, you can check
+[our eSpeak fork](https://github.com/balacoon/espeak-ng#creating-espeak-addon-for-balacoon-frontend) for more information.

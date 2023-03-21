@@ -21,7 +21,9 @@ So you will need to update both package and addons.
 
 [ONNX Runtime](https://onnxruntime.ai/) is a powerful open-source engine that provides a universal neural backend
 for deploying and optimizing deep learning models trained with different frameworks.
-It simplifies the release of a library to different platforms and allows for different optimizations.
+It simplifies the release of a library to different platforms
+(*Windows, RaspberryPi, Android are in the roadmap*)
+and allows for [different optimizations](https://fs-eire.github.io/onnxruntime/docs/performance/tune-performance.html).
 Additionally, it enables the export of models to even faster backends such as TensorRT, which we will explore
 in the future. At present, we plan to use ONNX as a backend for CPU inference,
 although there are still some unresolved issues to address, such as half-precision inference on CPU.
@@ -29,23 +31,27 @@ although there are still some unresolved issues to address, such as half-precisi
 ## Streaming synthesis
 
 Streaming speech synthesis is an important technology that enables real-time generation of speech while
-reducing perceived latency. This approach to speech synthesis breaks down the process of speech
+reducing perceived latency[[1]](#1). This approach to speech synthesis breaks down the process of speech
 generation into smaller chunks, allowing the system to produce and deliver audio output in near real-time.
 This is particularly important for applications where low latency is critical, such as voice assistants,
 interactive voice response (IVR) systems, and chatbots. While streaming speech synthesis offers a faster
 response time, it comes at the cost of overall inference speed, as the system is constantly generating small
 audio segments in real-time. Despite this, streaming synthesis remains essential for applications where
 real-time audio feedback is necessary.
-
-![alt]({{ site.url }}{{ site.baseurl }}/assets/images/streaming_synthesis.png)
-
+<figure style="width: 300px" class="align-center">
+  <img src="{{ site.url }}{{ site.baseurl }}/assets/images/streaming_synthesis.png" alt="">
+  <figcaption class="figure-caption text-center">Streaming synthesis in action</figcaption>
+</figure>
 The picture above illustrates the operating principle of streaming synthesis.
 The process begins with a frontend that takes in textual input and sends it to an encoder,
 which processes the input at the phoneme level.
 The encoder then upsamples the phonemes to create frame-level representations.
-A decoder then slides across these frame-level representations,
-converting them into audio output one small chunk at a time.
+**A decoder then slides across these frame-level representations,
+converting them into audio output one small chunk at a time.**
 By breaking down the speech synthesis process into smaller pieces,
 the system can produce and deliver speech output in real-time,
 reducing latency and enabling applications that require fast response times.
 
+## References
+<a id="1">[1]</a>
+High Quality Streaming Speech Synthesis with Low, Sentence-Length-Independent Latency. [arxiv](https://arxiv.org/abs/2111.09052)

@@ -37,6 +37,8 @@ from huggingface_hub import hf_hub_download
 addon_path = hf_hub_download(repo_id="balacoon/tts", filename="en_us_cmuartic_jets_cpu.addon")
 ```
 
+*balacoon_tts* requires addons compiled for CPU, so pick those with *_cpu* suffix.
+
 ## Running synthesis
 
 That's it. You are all set to run synthesis.

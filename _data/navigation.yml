@@ -11,6 +11,8 @@ sidebar-use:
     children:
       - title: "As a package"
         url: /use/tts/package
+      - title: "As a self-hosted service"
+        url: /use/tts/service
   - title: "Frontend"
     children:
       - title: "Text processing in TTS"

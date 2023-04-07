@@ -21,3 +21,6 @@ There are three main directions we look into:
 - Disruptive technologies that aim to introduce new use cases
   and applications for speech generation. Due to high computational costs,
   we provide them as services.
+
+To get help or provide feedback,
+join [Balacoon Slack](https://join.slack.com/t/balacoon/shared_invite/zt-1syqpvq75-s7iCBJhZcQrsmrLrAU3fhw).

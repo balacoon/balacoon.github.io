@@ -69,6 +69,9 @@ footer:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/balacoon"
+    - label: "Slack"
+      icon: "fab fa-fw fa-slack"
+      url: "https://join.slack.com/t/balacoon/shared_invite/zt-1syqpvq75-s7iCBJhZcQrsmrLrAU3fhw"
 
 defaults:
   # _pages

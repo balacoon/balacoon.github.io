@@ -24,3 +24,6 @@ There are three main directions we look into:
 
 To get help or provide feedback,
 join [Balacoon Slack](https://join.slack.com/t/balacoon/shared_invite/zt-1syqpvq75-s7iCBJhZcQrsmrLrAU3fhw).
+
+All the artifacts you can find around here (packages, models, containers)
+are distributed with [MIT license](/license.html).

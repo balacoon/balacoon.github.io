@@ -56,7 +56,7 @@ samples = tts.synthesize("hello world", speaker)
 # up to you what to do with the synthesized samples (np.int16 array)
 # in this example we will save them to a file
 with wave.open("example.wav", "w") as fp:
-    fp.setparams((1, 2, 24000, len(samples), "NONE", "NONE"))
+    fp.setparams((1, 2, tts.get_sampling_rate(), len(samples), "NONE", "NONE"))
     fp.writeframes(samples)
 ```
 

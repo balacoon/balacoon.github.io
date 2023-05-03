@@ -30,7 +30,7 @@ for speakers unseen at the training stage of a system.
 Example:
 {% include embed-audio.html src="/assets/demo_audio/vc/meryl_streep.mp3" name="Source audio from Meryl Streep:" %}
 {% include embed-audio.html src="/assets/demo_audio/vc/kratos_short.mp3" name="God of War, to borrow voice from:" %}
-{% include embed-audio.html src="/assets/demo_audio/vc/streep2kratos_a2a.mp3" name="Meryl speaking as God of War:" %}
+{% include embed-audio.html src="/assets/demo_audio/vc/streep2kratos_a2a.mp3" name="Meryl speaking in voice of God of War:" %}
 
 You can try it yourself in our app:
 [<img src="../assets/images/google-play-badge.png" alt="voice conversion app" width="200">](https://play.google.com/store/apps/details?id=com.app.vc)

@@ -13,6 +13,10 @@ sidebar-use:
         url: /use/tts/package
       - title: "As a self-hosted service"
         url: /use/tts/service
+  - title: "VC"
+    children:
+      - title: "As a cloud service"
+        url: /use/vc/service
   - title: "Frontend"
     children:
       - title: "Text processing in TTS"

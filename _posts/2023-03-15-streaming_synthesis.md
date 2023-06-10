@@ -1,5 +1,8 @@
 ---
 title: "Balacoon TTS version 0.1.0"
+excerpt: Introducing Balacoon TTS: The Ultimate Python Package for Speech Synthesis with State-of-the-Art Quality and Minimal Latency
+seo_title: Transform Your Python Applications with Balacoon TTS: Precompiled Package for Linux and Raspberry Pi
+seo_description: Elevate your Python applications with the power of Balacoon TTS, the precompiled Python package for speech synthesis. Experience state-of-the-art quality and minimal latency with support for streaming synthesis. Unlock unparalleled capabilities on Linux and Raspberry Pi, revolutionizing the way you integrate speech synthesis into your projects.
 last_modified_at: 2023-03-15T16:20:02-05:00
 categories:
   - Blog

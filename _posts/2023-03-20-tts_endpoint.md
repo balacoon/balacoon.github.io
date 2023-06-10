@@ -1,5 +1,8 @@
 ---
 title: "Balacoon TTS as a service"
+excerpt: Discover the Future of Text-to-Speech: Self-Hosted Service for Lightning-Fast Speech Generation
+seo_title: Revolutionary Self-Hosted Text-to-Speech Service: GPU-Powered, Parallel Requests, Unmatched Speed
+seo_description: Unleash the power of a self-hosted text-to-speech service with a Docker container on your GPU machine. Handle hundreds of parallel requests and generate up to 3.5 hours of speech in just 30 seconds. Experience the low-latency streaming synthesis technology with response times as low as 100ms. Revolutionize your speech synthesis capabilities like never before.
 last_modified_at: 2023-03-20T16:20:02-05:00
 categories:
   - Blog

@@ -56,6 +56,12 @@ plugins:
   - jemoji
   - jekyll-include-cache
 
+analytics:
+  provider: "google-gtag"
+  google:
+    tracking_id: "G-XJCNNC3FM2"
+    anonymize_ip: false # default
+
 author:
   name   : "Balacoon"
   avatar : "/assets/images/logo.png"

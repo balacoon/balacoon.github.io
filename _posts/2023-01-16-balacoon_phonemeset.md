@@ -71,7 +71,7 @@ Neural TTS takes phoneme indices as inputs. Having a fixed phoneme set, we can d
 We reserve indices from 6 to 9 for any additional service tokens that might be helpful for Speech Synthesis. The phoneme set defined previously starts from index 10 and spans to 253.
 According to the definition above, we separately encode stress and tone in order, starting from index 1. Index 0 is reserved for phonemes without stress and for padding.
 
-The complete phoneme set can be found within [learn_to_normalize](https://github.com/balacoon/learn_to_pronounce/tree/main/data).
+The complete phoneme set can be found within [learn_to_pronounce](https://github.com/balacoon/learn_to_pronounce/tree/main/data).
 We did a trial of a freshly composed unified phoneme set, by mapping CMUDict and underlying ARPABET. It worked smoothly, notes on the process can be found [here](https://github.com/balacoon/en_us_pronunciation/blob/f683b7c4d9ad8baad048b3ff8bb9f8e900ccab43/cmudict/README.md). We hope that pronunciation dictionaries in other locales wouldn't pose a difficulty either. Which will pave the way to a frictionless multi-lingual TTS.
 
 ## References

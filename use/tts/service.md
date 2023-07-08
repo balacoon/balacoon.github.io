@@ -15,7 +15,7 @@ Pull the image from [Docker Hub](https://hub.docker.com/r/balacoon/tts_server).
 Follow up with [NVIDIA docs](https://docs.nvidia.com/deeplearning/triton-inference-server/release-notes/rel_22-08.html) for GPU and driver requirements.
 
 ```bash
-docker pull balacoon/tts_server:0.1
+docker pull balacoon/tts_server:0.2
 ```
 
 ## Starting the endpoint

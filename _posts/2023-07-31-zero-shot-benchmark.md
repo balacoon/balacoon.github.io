@@ -12,9 +12,15 @@ tags:
 
 Synthesizing speech with a speaker identity not seen during training presents a significant challenge. Traditionally, achieving this required extensive training on many speakers to ensure a continuous speaker space[[1]](#1). The most performant methods, such as [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI/blob/main/docs/README.en.md), still need minimal fine-tuning with ~10 minutes of target speaker data to achieve reasonable quality. However, the approaches leveraging the power of big models are gaining momentum. For instance, Microsoft's VALL-E[[2]](#2) boldly claims to clone a speaker's voice with just 3 seconds of speech as a reference. In this blog post, we aim to present a benchmark of voice conversion technologies, comparing [Revoice](https://play.google.com/store/apps/details?id=com.app.vc&hl=en_US) to the widely spread zero-shot VC baselines.
 
-## Testset
+## Testsets
 
-Typical evaluations of Voice Conversion systems rely on objective metrics collected from unseen multi-speaker corpora like [VCTK](https://datashare.ed.ac.uk/handle/10283/3443). We have observed that these evaluations can yield overly optimistic results, thus we have designed a more challenging setup for our benchmark. We use source audio from the DAPS corpus[[3]](#3), consisting of emulated mobile device recordings in various conditions. As for the reference audio, we draw from a diverse library of speakers the Revoice app provides. This setup ensures a wide range of speakers and recording conditions, more tailed to the real-life application scenario.
+Typical evaluations of Voice Conversion systems rely on objective metrics collected from running conversion on unseen multi-speaker corpora.
+We design the evaluation to be insightful for the `Revoice` use-case. We use multi-speaker corpora as a source or input audio and
+a library of speakers from Revoice app as a target or reference audio. Input audio is derived from:
+
+* [VCTK](https://datashare.ed.ac.uk/handle/10283/3443) - classical voice conversion benchmark. Clean recordings, multiple accents.
+* DAPS corpus[[3]](#3) - emulated mobile device recordings in various conditions. This dataset resembles the audio quality
+  we obtain as a Voice Conversion service more closely.
 
 ## Metrics
 
@@ -39,15 +45,24 @@ The autoregressive transformer decoder in BARK is significantly slower than para
 
 ## Results
 
-We present results of the benchmark in the table below:
+We present results of the evaluations in the tables below.
+Here is performance of the systems on `VCTK`:
 
-| Model | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(cosine distance↓)
+| Model | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(inverted cosine distance↓)
+| --- | :---: | :---: | :---: |
+| YourTTS[*](#0) | 3.21 | **1.08** | 0.613 |
+| BARK | **3.49** | 2.58 | 0.692 |
+| Revoice | 3.45 | 1.36 | 0.614 |
+
+And performance on `DAPS`:
+
+| Model | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(inverted cosine distance↓)
 | --- | :---: | :---: | :---: |
 | YourTTS | 2.08 | 26.7 | 0.655 |
 | BARK | **2.85** | **14.77** | 0.738 |
 | Revoice | 2.81 | 16.56 | **0.564** |
 
-And a small example of systems performance. For the these inputs:
+Small example of how systems actually sound. For the these inputs:
 
 {% include embed-audio.html src="/assets/posts/vc_benchmark/source.mp3" name="Source audio" %}
 {% include embed-audio.html src="/assets/demo_audio/vc/kratos_short.mp3" name="Reference of target voice" %}
@@ -58,9 +73,10 @@ The systems produce following outputs:
 {% include embed-audio.html src="/assets/posts/vc_benchmark/bark.mp3" name="BARK" %}
 {% include embed-audio.html src="/assets/posts/vc_benchmark/revoice.mp3" name="Revoice" %}
 
-Revoice reaches closely to the BARK system in terms of naturalness and intelligibility while beating
-it in terms of similarity by a large margin. YourTTS, despite the excellent performance reported in the paper on the VCTK corpus,
-struggles to deliver competetive intelligibility for more challenging inputs.
+YourTTS shows excellent performance on `VCTK` but degrades significantly on more noisy inputs.
+BARK consistently delivers clean and intelligible audio, but the speaker similarity lags.
+Revoice competes with BARK in terms of naturalness and intelligibility while making a leap
+forward in terms of speaker similarity.
 
 ## References
 <a id="1">[1]</a>
@@ -84,6 +100,10 @@ struggles to deliver competetive intelligibility for more challenging inputs.
 <a id="7">[7]</a>
 [HuBERT: Self-Supervised Speech Representation Learning by Masked Prediction of Hidden Units](https://arxiv.org/pdf/2106.07447.pdf)
 
+***
+
+<a id="0">*</a>
+YourTTS uses `VCTK` in training, which might give slightly overly optimistic results.
 
 
 

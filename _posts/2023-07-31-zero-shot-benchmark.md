@@ -50,6 +50,7 @@ Here is performance of the systems on `VCTK`:
 
 | Model | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(inverted cosine distance↓)
 | --- | :---: | :---: | :---: |
+| no model | 4.06 | 0.17 | - |
 | YourTTS[*](#0) | 3.21 | **1.08** | 0.613 |
 | BARK | **3.49** | 2.58 | 0.692 |
 | Revoice | 3.45 | 1.36 | 0.614 |
@@ -58,6 +59,7 @@ And performance on `DAPS`:
 
 | Model | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(inverted cosine distance↓)
 | --- | :---: | :---: | :---: |
+| no model | 2.39 | 2.755 | - |
 | YourTTS | 2.08 | 26.7 | 0.655 |
 | BARK | **2.85** | **14.77** | 0.738 |
 | Revoice | 2.81 | 16.56 | **0.564** |

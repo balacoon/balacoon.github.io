@@ -36,7 +36,7 @@ decoder to operate on discrete speech representations.
 
 Discrete speech representations or tokens are obtained from
 two pre-trained models - HuBERT[[5]](#5) and Encodec[[6]](#6):
-<figure style="width: 300px" class="align-center">
+<figure style="width: 600px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/bark_tokenization.png" alt="">
   <figcaption class="figure-caption text-center">Tokenization in BARK</figcaption>
 </figure>
@@ -64,7 +64,7 @@ The prompt carries information about speaker identity, recording conditions,
 and even some high-level prosody aspects, but not the actual content.
 Fine tokens just refine the acoustic information from coarse tokens and don't need as powerful modeling.
 The transformer encoder (i.e. parallel architecture) is used for fine tokens prediction to speed things up.
-<figure style="width: 300px" class="align-center">
+<figure style="width: 600px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/bark_acoustic.png" alt="">
   <figcaption class="figure-caption text-center">Acoustic modeling in BARK</figcaption>
 </figure>
@@ -93,11 +93,11 @@ Measurements are done on GPU, averaging inference time for multiple utterances o
 
 | Model | Function  | Parameters | Average Inference time, s |
 | --- | :---: | :---: | :---: |
-| HuBERT | audio -> semantic tokens | 95M | 0.035 |
-| Encodec Decoder | coarse/fine tokens -> audio | 15M | 0.025 |
-| Text AR Transformer Decoder | text -> semantic tokens | 446M | 11 |
-| AR Transformer Decoder | semantic tokens -> coarse tokens | 328M | *45* |
-| Transformer Encoder | coarse tokens -> fine tokens | 319M | 0.37 |
+| HuBERT | audio → semantic tokens | 95M | 0.035 |
+| Encodec Decoder | coarse/fine tokens → audio | 15M | 0.025 |
+| Text AR Transformer Decoder | text → semantic tokens | 446M | 11 |
+| AR Transformer Decoder | semantic tokens → coarse tokens | 328M | **45** |
+| Transformer Encoder | coarse tokens → fine tokens | 319M | 0.37 |
 
 Flattening coarse/fine tokens requires AR Transformer Decoder to work on a very long context.
 This makes it the slowest component of the whole pipeline by far.
@@ -194,7 +194,7 @@ time CUDA_VISIBLE_DEVICES=1 python ../examples/pytorch/gpt/multi_gpu_gpt_example
     --sample_input_file context.txt
 ```
 
-It takes only 1.5 seconds, a mind-blowing speed compared to the original performance.
+It takes only 1.5 seconds, a mind-blowing speed up compared to the original performance.
 
 ## References
 

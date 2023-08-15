@@ -1,6 +1,6 @@
 ---
 title: "Dissecting BARK"
-last_modified_at: 2023-08-15T16:20:02-05:00
+last_modified_at: 2023-08-15T10:20:02+05:00
 toc: true
 categories:
   - Blog

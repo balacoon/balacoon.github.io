@@ -180,11 +180,18 @@ git clone https://huggingface.co/gpt2-medium
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
 apt-get install git-lfs
 cd gpt2-medium && git lfs pull && cd ..
-python ../examples/pytorch/gpt/utils/huggingface_gpt_convert.py -i gpt2-medium/ -o ../models/huggingface-models/c-model/gpt2-medium -i_g 1
+python ../examples/pytorch/gpt/utils/huggingface_gpt_convert.py -i gpt2-medium/ \
+    -o ../models/huggingface-models/c-model/gpt2-medium -i_g 1
 echo "hello world" > context.txt
 
-# run generation on one GPU
-time CUDA_VISIBLE_DEVICES=1 python ../examples/pytorch/gpt/multi_gpu_gpt_example.py --ckpt_path ../models/huggingface-models/c-model/gpt2-medium/1-gpu/ --time --inference_data_type fp16 --tensor_para_size 1 --pipeline_para_size 1 --beam_width 1 --top_k 1 --top_p 0 --temperature 1.0 --return_cum_log_probs 0 --output_len 1000  --vocab_file gpt2-medium/vocab.json --merges_file gpt2-medium/merges.txt  --max_batch_size 1 --min_length 1000 --lib_path lib/libth_transformer.so --sample_input_file context.txt
+# run generation on a GPU for 1k tokens
+time CUDA_VISIBLE_DEVICES=1 python ../examples/pytorch/gpt/multi_gpu_gpt_example.py \
+    --ckpt_path ../models/huggingface-models/c-model/gpt2-medium/1-gpu/ \
+    --time --inference_data_type fp16 --tensor_para_size 1 --pipeline_para_size 1 \
+    --beam_width 1 --top_k 1 --top_p 0 --temperature 1.0 --return_cum_log_probs 0 \
+    --output_len 1000  --vocab_file gpt2-medium/vocab.json --merges_file gpt2-medium/merges.txt  \
+    --max_batch_size 1 --min_length 1000 --lib_path lib/libth_transformer.so \
+    --sample_input_file context.txt
 ```
 
 It takes only 1.5 seconds, a mind-blowing speed compared to the original performance.

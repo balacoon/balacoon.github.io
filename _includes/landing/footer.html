@@ -1,0 +1,17 @@
+<footer>
+	{% if site.landing.your_name %}
+	<p class="footerText">Made by {% if site.landing.your_link %}<a href="{{ site.landing.your_link }}">{% endif %}{{ site.landing.your_name }}{% if site.landing.your_link %}</a>{% endif %}</p>
+	{% endif %}
+	<div class="footerIcons">
+
+		{% if site.landing.email_address %}
+			<a href="mailto:{{ site.landing.email_address }}">
+				<span class="fa-stack fa-1x">
+					<i class="socialIconBack fas fa-circle fa-stack-2x"></i>
+					<i class="socialIconTop fas fa-envelope fa-stack-1x"></i>
+				</span>
+			</a>
+		{% endif %}
+
+	</div>
+</footer>

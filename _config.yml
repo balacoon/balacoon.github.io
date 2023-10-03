@@ -99,14 +99,85 @@ defaults:
       comments: true
       share: true
       related: true
-  # use
+  # freeware
   - scope:
-      path: "use"
+      path: "freeware"
       type: pages
     values:
       layout: single
       author_profile: false
       sidebar:
-        title: "Usage"
-        nav: sidebar-use
+        title: "How-to"
+        nav: sidebar-freeware
+  # products
+  - scope:
+      path: "products"
+      type: pages
+    values:
+      layout: single
+      author_profile: false
+      sidebar:
+        title: "Check out"
+        nav: sidebar-products
 
+landing:
+  page_title: Revoice
+  playstore_link: https://play.google.com/store/apps/details?id=com.app.vc
+  presskit_download_link: https://balacoon.com/                                          # Enter a link to downloadable file or (e.g. public Dropbox link to a .zip file). 
+  app_icon: assets/landing/appicon.jpg
+  app_name: "Revoice: Change your voice"
+  app_price: ""
+  app_description: Sound like anyone with Revoice. Change your voice in audio messages or social media reels. Select the target voice from a preset library with hundreds of celebrities.
+  enable_smart_app_banner: true
+  # Information About Yourself
+  your_name: Balacoon
+  your_link: https://balacoon.com
+  email_address: contact@balacoon.com
+
+  # Feature List                            Edit, add or remove features to be presented.
+  features:
+    - title: Sound like anyone
+      description: Our voice-changing technology allows you to mimic anyone. Play with your intonation and record in a quiet environment to get better results.
+      fontawesome_icon_name: magic
+
+    - title: Library of voices
+      description: Select how you want to sound like, browsing the library with hundreds of celebrities.
+      fontawesome_icon_name: list
+
+    - title: Custom voice
+      description: If you need a custom target voice, upload a 10-second snippet of someone speaking. Parody your friends, relatives, and loved ones.
+      fontawesome_icon_name: fingerprint
+
+    - title: Audio messages
+      description: Share the converted speech via messenger (Whatsapp/Telegram/Facebook), and it will appear as an audio message from you.
+      fontawesome_icon_name: comment
+
+    - title: Video
+      description: Convert the speech within a video to create engaging social media reels.
+      fontawesome_icon_name: video
+
+    - title: Use responsibly
+      description: The app is created for entertainment purposes only. Use responsibly.
+      fontawesome_icon_name: bell
+
+  # Theme Settings
+  topbar_color                              : "#000000"
+  topbar_transparency                       : 0.1
+  topbar_title_color                        : "#ffffff"
+  cover_image                               : assets/landing/headerimage.png                    # Replace with alternative image path or image URL.
+  cover_overlay_color                       : "#363b3d"
+  cover_overlay_transparency                : 0.8
+  device_color                              : black                                     # Set to: blue, black, yellow, coral or white.
+  body_background_color                     : "#ffffff"
+  link_color                                : "#1d63ea"
+  app_title_color                           : "#ffffff"
+  app_price_color                           : "#ffffff"
+  app_description_color                     : "#ffffff"
+  feature_title_color                       : "#000000"
+  feature_text_color                        : "#666666"
+  feature_icons_foreground_color            : "#1d63ea"
+  feature_icons_background_color            : "#e6e6e6"
+  social_icons_foreground_color             : "#666666"
+  social_icons_background_color             : "#e6e6e6"
+  footer_text_color                         : "#666666"
+  

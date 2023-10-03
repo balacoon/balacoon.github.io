@@ -1,27 +1,28 @@
 main:
-  - title: "Use"
-    url: /use/
-  - title: "Demo"
-    url: /demo/
+  - title: "Freeware"
+    url: /freeware/
+  - title: "Products"
+    url: /products/
   - title: "Posts"
     url: /posts/
 
-sidebar-use:
+sidebar-freeware:
   - title: "TTS"
     children:
       - title: "As a package"
-        url: /use/tts/package
+        url: /freeware/tts/package
       - title: "As a self-hosted service"
-        url: /use/tts/service
-  - title: "VC"
-    children:
-      - title: "As a cloud service"
-        url: /use/vc/service
+        url: /freeware/tts/service
   - title: "Frontend"
     children:
       - title: "Text processing in TTS"
-        url: /use/frontend
+        url: /freeware/frontend
       - title: "Pronunciation"
-        url: /use/frontend/learn_to_pronounce
+        url: /freeware/frontend/learn_to_pronounce
       - title: "Text Normalization"
-        url: /use/frontend/learn_to_normalize
+        url: /freeware/frontend/learn_to_normalize
+
+sidebar-products:
+  - title: "Revoice"
+    url: /revoice
+

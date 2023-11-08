@@ -122,6 +122,7 @@ defaults:
 
 landing:
   page_title: Revoice
+  appstore_link: https://play.google.com/store/apps/details?id=com.app.vc
   playstore_link: https://play.google.com/store/apps/details?id=com.app.vc
   presskit_download_link: https://balacoon.com/                                          # Enter a link to downloadable file or (e.g. public Dropbox link to a .zip file). 
   app_icon: assets/landing/appicon.jpg

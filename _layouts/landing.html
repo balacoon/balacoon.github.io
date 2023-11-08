@@ -51,11 +51,11 @@
                             </p>
                         </div>
                         <div class="downloadButtonsContainer">
+                            {% if site.landing.appstore_link %}
+                                <a class="appStoreLink" href="{{site.landing.appstore_link}}"><img class="appStore" src="/assets/landing/appstore.png"></a>
+                            {% endif %}
                             {% if site.landing.playstore_link %}
                                 <a class="playStoreLink" href="{{site.landing.playstore_link}}"><img class="playStore" src="/assets/landing/playstore.png"></a>
-                            {% endif %}
-                            {% if site.landing.appstore_link %}
-                            <a class="appStoreLink" href="{{site.landing.appstore_link}}"><img class="appStore" src="/assets/landing/appstore.png"></a>
                             {% endif %}
                         </div>
                     </div>

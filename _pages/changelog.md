@@ -11,6 +11,11 @@ Here you can find what's new in the Revoice app. Keep up with the updates to get
 <br>
 
 ### `Latest`
+# **Version 1.9.6**
+Synthesis from text is introduced!
+Now you can synthesize audio with any voice from text.
+For now, only english is supported.
+
 # **Version 1.8.6**
 This is the version after the app suspension by Google. We had to include an audio watermark to comply
 with the [Manipulated Media Policy](https://support.google.com/googleplay/android-developer/answer/9888077#!?zippy_activeEl=manipulated-media%23manipulated-media).

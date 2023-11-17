@@ -1,27 +1,88 @@
 <div class="features">
+	<div class="feature">
+	    <div>
+		<span class="fa-stack fa-1x">
+		    <i class="iconBack fas fa-circle fa-stack-2x"></i>
+		    <i class="iconTop fas fa-magic fa-stack-1x"></i>
+		</span>
+	    </div>
+	    <div class="featureText">
+		<h3>
+		    Sound like anyone
+		</h3>
+		<p>
+		    Our voice-changing technology allows you to mimic anyone. Play with your intonation and record in a quiet environment to get better results.
+		</p>
+	    </div>
+	</div>
 
-    {% for feature in site.landing.features %}
+	<div class="feature">
+	    <div>
+		<span class="fa-stack fa-1x">
+		    <i class="iconBack fas fa-circle fa-stack-2x"></i>
+		    <i class="iconTop fas fa-list fa-stack-1x"></i>
+		</span>
+	    </div>
+	    <div class="featureText">
+		<h3>
+		    Library of voices
+		</h3>
+		<p>
+		    Select how you want to sound like, browsing the library with hundreds of celebrities.
+		</p>
+	    </div>
+	</div>
 
-    {% if feature.title %}
-    <div class="feature">
-        <div>
-            <span class="fa-stack fa-1x">
-                <i class="iconBack fas fa-circle fa-stack-2x"></i>
-                <i class="iconTop fas fa-{{ feature.fontawesome_icon_name }} fa-stack-1x"></i>
-            </span>
-        </div>
-        <div class="featureText">
-            <h3>
-                {{ feature.title }}
-            </h3>
-            <p>
-                {{ feature.description }}
-            </p>
-        </div>
-    </div>
-    {% endif %}
+	<div class="feature">
+	    <div>
+		<span class="fa-stack fa-1x">
+		    <i class="iconBack fas fa-circle fa-stack-2x"></i>
+		    <i class="iconTop fas fa-fingerprint fa-stack-1x"></i>
+		</span>
+	    </div>
+	    <div class="featureText">
+		<h3>
+		    Custom voice
+		</h3>
+		<p>
+		    If you need a custom target voice, upload a 10-second snippet of someone speaking. Parody your friends, relatives, and loved ones.
+		</p>
+	    </div>
+	</div>
 
-    {% endfor %}
+	<div class="feature">
+	    <div>
+		<span class="fa-stack fa-1x">
+		    <i class="iconBack fas fa-circle fa-stack-2x"></i>
+		    <i class="iconTop fas fa-comment fa-stack-1x"></i>
+		</span>
+	    </div>
+	    <div class="featureText">
+		<h3>
+		    Audio messages
+		</h3>
+		<p>
+		    Share the converted speech via messenger (Whatsapp/Telegram/Facebook), and it will appear as an audio message from you.
+		</p>
+	    </div>
+	</div>
+
+	<div class="feature">
+	    <div>
+		<span class="fa-stack fa-1x">
+		    <i class="iconBack fas fa-circle fa-stack-2x"></i>
+		    <i class="iconTop fas fa-video fa-stack-1x"></i>
+		</span>
+	    </div>
+	    <div class="featureText">
+		<h3>
+		    Video
+		</h3>
+		<p>
+		    Convert the speech within a video to create engaging social media reels.
+		</p>
+	    </div>
+	</div>
 
     <div class="feature">
         <div>
@@ -56,6 +117,4 @@
             </p>
         </div>
     </div>
-
-
 </div>

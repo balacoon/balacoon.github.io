@@ -15,7 +15,7 @@ In this post, we explore how to apply convolutional layers to infinitely long in
 # Conv1d
 
 First, let's examine a standard convolutional layer. By default, convolutions are `non-causal`, meaning the output at any given time may depend on both past and future input values.
-<figure style="width: 200px" class="align-center">
+<figure style="width: 400px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/streaming_inference/non_causal_conv.png" alt="">
   <figcaption class="figure-caption text-center">Non-causal convolution</figcaption>
 </figure>
@@ -42,7 +42,7 @@ assert x.shape == y.shape
 
 For chunked inference, padding must be applied manually, and the input
 shifted by `chunk_size - 2 * receptive_field` for each subsequent chunk.
-<figure style="width: 200px" class="align-center">
+<figure style="width: 400px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/streaming_inference/non_causal_conv_chunks.png" alt="">
   <figcaption class="figure-caption text-center">Non-causal convolution in chunks</figcaption>
 </figure>
@@ -81,7 +81,7 @@ If you have a stack of convolutional layers, their receptive fields simply add u
 # Causal Conv1d
 
 For online processing (such as live denoising or voice conversion), latency is influenced by both `chunk_size` and the `receptive_field` of the convolutional kernel on the right, also known as lookahead. While chunk size is adjustable, the receptive field is limited by the architecture. To reduce latency, one should aim to design a convolution with an asymmetrical receptive field. In the extreme case, with no lookahead, this results in a `causal` convolutional layer:
-<figure style="width: 200px" class="align-center">
+<figure style="width: 400px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/streaming_inference/causal_conv.png" alt="">
   <figcaption class="figure-caption text-center">Causal convolution</figcaption>
 </figure>
@@ -125,7 +125,7 @@ assert torch.all(chunked_y == y)
 
 In audio or image processing, low-dimensional latent representations often need to be upsampled back to samples or pixels. This is achieved through transposed convolution with strides. A detailed explanation of this can be found in a [blogpost](https://medium.com/@santi.pdp/how-pytorch-transposed-convs1d-work-a7adac63c4a5) on the topic. In short, each input point expands into multiple output points. The `stride` determines the degree of upsampling performed by the transposed convolution, usually set so `kernel_size = stride * 2` to prevent [checkboard artifacts](https://distill.pub/2016/deconv-checkerboard/). Two neighboring input points contribute to each output point. Padding in this case actually reduces the number of output points at the edges, ensuring that `stride * len(input)` output points are produced.
 
-<figure style="width: 210px" class="align-center">
+<figure style="width: 500px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/streaming_inference/transposed_conv.png" alt="">
   <figcaption class="figure-caption text-center">Transposed convolution with stride</figcaption>
 </figure>
@@ -152,7 +152,7 @@ assert y.shape == (x.size(0), x.size(1), x.size(2) * upsample_rate)
 ```
 
 Running transposed convolution in chunks is similar to regular convolution: edges of the output are trimmed, input is padded, and inference is performed on overlapping chunks.
-<figure style="width: 210px" class="align-center">
+<figure style="width: 600px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/streaming_inference/transposed_conv_chunks.png" alt="">
   <figcaption class="figure-caption text-center">Transposed convolution with stride in chunks</figcaption>
 </figure>
@@ -342,8 +342,8 @@ assert input_length - left - right == y.size(2)
 ```
 
 From previous examples, for inference in chunks, we need to shift the input by `chunk_size`, which is the input size without receptive fields. In our case, the chunk_size is `320 * N + 1024 - left - right`. For `N==50`, it is `8746`. There is a problem, however. We can only shift the input by the stride of the downsampling layer(s), in our case by `M * 320`. For most architectures, there is no way to satisfy both requirements:
- * Shift by chunk_size
- * Shift by M * downsampling_stride
+ * Shift by `chunk_size`
+ * Shift by `M * downsampling_stride`
 To overcome this issue, we'll have to drop some extra samples from the output, in order to be able to do inference in chunks:
 
 ```python

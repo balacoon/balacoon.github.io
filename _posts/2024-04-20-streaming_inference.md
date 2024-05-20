@@ -243,7 +243,7 @@ assert torch.all(torch.abs(chunked_y - y) < 1e-3)
 
 The inverse Fourier transform is surprisingly more complex. Let's revisit the audio example to understand why. Overlapping frames create interesting patterns that influence which frames affect which samples in the output.
 <figure style="width: 400px" class="align-center">
-  <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/streaming_inference/inverse_fourier_transform.png" alt="">
+  <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/streaming_inference/iverse_fourier_transform.png" alt="">
   <figcaption class="figure-caption text-center">Overlapping frames in the Inverse Fourier transform</figcaption>
 </figure>
 In the illustration above, a chunk of 6 frames is shown with framing parameters of `n_fft = 1024` and `hop_length = 320`. Since `n_fft % hop_length != 0`, the number of frames that affect the output samples varies between 3 and 4. For the edges of the input, it is fewer, and these regions should be considered the receptive field.

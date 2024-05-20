@@ -239,7 +239,73 @@ assert chunked_y.shape == y.shape
 assert torch.all(torch.abs(chunked_y - y) < 1e-3)
 ```
 
-# Putting it all together
+# Inverse Fourier transform
+
+The inverse Fourier transform is surprisingly more complex. Let's revisit the audio example to understand why. Overlapping frames create interesting patterns that influence which frames affect which samples in the output.
+<figure style="width: 400px" class="align-center">
+  <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/streaming_inference/inverse_fourier_transform.png" alt="">
+  <figcaption class="figure-caption text-center">Overlapping frames in the Inverse Fourier transform</figcaption>
+</figure>
+In the illustration above, a chunk of 6 frames is shown with framing parameters of `n_fft = 1024` and `hop_length = 320`. Since `n_fft % hop_length != 0`, the number of frames that affect the output samples varies between 3 and 4. For the edges of the input, it is fewer, and these regions should be considered the receptive field.
+
+Just like before, executing the inverse Short-Time Fourier Transform (iSTFT) on the entire input:
+
+```python
+import torch
+from nnAudio.features.stft import iSTFT
+
+win_length = 1024
+upsample_rate = 320
+istft = iSTFT(
+    n_fft=win_length,
+    win_length=win_length,
+    hop_length=upsample_rate,
+    center=False,
+)
+
+total_frames = 100
+x = torch.randn(1, win_length//2 + 1, total_frames, 2)
+y = istft(x, onesided=True)
+
+receptive = win_length - upsample_rate
+# to have an even upsampling, we should slice half of the receptive.
+# this leaves some edge effects however 
+y_padded = y[:, receptive // 2:-receptive // 2]
+assert y_padded.size(1) == total_frames * upsample_rate
+# keeping only output that doesn't have edge effects,
+# we need to slice off entire receptive field
+y = y[:, receptive:-receptive]
+```
+
+Running in chunks includes manual slicing from the output of the iSTFT,
+to remove regions without boundary effects:
+
+```python
+import numpy as np
+
+chunked_y_lst = []
+start = 0
+chunk_size = 5
+overlap = int(win_length / upsample_rate)
+while start <= total_frames - chunk_size:
+    chunk = x[:, :, start:start + chunk_size + overlap]
+    chunk_out = istft(chunk, onesided=True)
+    left = win_length - win_length % upsample_rate
+    right = receptive
+    chunk_out = chunk_out[:, left:-right]
+
+    chunked_y_lst.append(chunk_out)
+    start += chunk_size
+
+chunked_y = torch.cat(chunked_y_lst, dim=1)
+# some of the original output is lost
+lost = upsample_rate - win_length % upsample_rate
+y_with_lost = y[:, lost:chunked_y.size(1) + lost]
+
+assert torch.mean(torch.abs(chunked_y - y_with_lost)) < 1e-5
+```
+
+# Putting it all together (Transposed Conv)
 
 Let's integrate everything and examine how layers might interact in a typical audio-to-audio stack, where audio is first downsampled to a latent representation and then upsampled back. The model might look something like this:
 
@@ -366,7 +432,7 @@ start = chunk_size - extra_to_drop
 y_chunk_2 = model(x[:, start:(start + input_length)])
 # now we need to slice off the `extra_to_drop` from both outputs
 y_chunk_list = [y_chunk_1, y_chunk_2]
-y_chunk_list = [chunk[:, :, :-extra_to_drop] for chunk in y_chunk_list]
+y_chunk_list = [chunk[:, :-extra_to_drop] for chunk in y_chunk_list]
 y_chunk = torch.cat(y_chunk_list, dim=2)
 
 # finally compare the chunked inference to the original one.
@@ -376,6 +442,127 @@ y_chunk = torch.cat(y_chunk_list, dim=2)
 diff = y[:, :, :y_chunk.size(2)] - y_chunk
 # should be the same
 assert torch.all(torch.abs(diff) < 1e-3)
+```
+
+# Putting it all together (iSTFT)
+
+Now, let's do the same, but replace the upsampling with transposed convolutions and use the inverse STFT (iSTFT). Once again, we will ensure that carefully computing the total receptive field of all layers allows us to run inference on chunks of input.
+
+Model definition:
+
+```python
+from typing import List
+import torch
+from nnAudio.features.stft import STFT, iSTFT
+
+def create_conv_stack(kernels: List[int], in_channels: int, out_channels: int) -> torch.nn.Sequential:
+    """
+    Creates a dummy convolutional stack
+    """
+    lst = []
+    for i, k in enumerate(kernels):
+        ic = in_channels if i == 0 else out_channels
+        lst.append(
+            torch.nn.Conv1d(
+                ic,  # input channels
+                out_channels,  # output channels
+                k,
+                bias=False,
+                padding=0,
+            )
+        )
+    return torch.nn.Sequential(*lst)
+
+class iSTFTWrap(torch.nn.Module):
+    def __init__(self, n_fft, hop_length):
+        super().__init__()
+        self._istft = iSTFT(
+            n_fft=n_fft,
+            win_length=n_fft,
+            hop_length=hop_length,
+            center=False,
+        )
+        self._left = n_fft - n_fft % hop_length
+        self._right = n_fft - hop_length
+    
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # the input x is (batch x 1026 x frames)
+        x = x.view(x.size(0), 2, x.size(1) // 2, x.size(2))  # (batch x 2 x 513 x frames)
+        x = x.permute(0, 2, 3, 1)  # (batch x 513 x frames x 2)
+        y = self._istft(x, onesided=True)
+        return y[:, self._left:-self._right]
+
+"""
+Finally the model, which is a stack of
+STFT -> conv_stack -> out_conv -> iSTFT
+"""
+model = torch.nn.Sequential(
+    STFT(
+        n_fft=1024,
+        win_length=1024,
+        hop_length=320,
+        center=False,  # disables the padding
+        output_format="Magnitude",
+        pad_mode="constant"
+    ),
+    create_conv_stack([5, 5, 5], 513, 1),
+    create_conv_stack([7], 1, 513 * 2),
+    iSTFTWrap(
+        n_fft=1024,
+        hop_length=320,
+    )
+)
+
+# define receptive fields of each layer in the stack
+# for each layer, specify (left_receptive, right_receptive, resolution)
+receptives_with_resolutions = [
+    (1024 - 320, 0, 1),  # STFT: requires (win_len - hop_size) on the left 
+    ((5 - 1) * 3, 0, 320),  # conv_stack: 3 causal layers with receptive of (kernel_size - 1) 
+    (7 // 2, 7 // 2, 320), # projection conv: non-causal conv layer with symmetric repective of kernel_size // 2
+    (960, 0, 1), # iSTFT: requires hop_length * overlap * 2 on the left and receptive on the right
+]
+# bring all to the same resolution (samples)
+receptives = [(left * res, right * res) for left, right, res in receptives_with_resolutions]
+# this is our overlap in case of chunked synthesis
+left = sum([left for left, _ in receptives])  # 6464
+# and this is our architectural latency, in case of online processing
+right = sum([right for _, right in receptives])  # 960
+```
+
+Now, let's compute the expected input/output lengths. Notice that there is no `extra_to_drop` because the chunk size is divisible by the `hop_size`.
+
+```python
+input_length = 320 * 50 + 1024
+chunk_size = input_length - left - right  # 9600
+```
+
+Finally, let's confirm that running inference on chunks produces the same result as when processing the entire input.
+
+```python
+# some random input
+x = torch.randn((1, 100000))
+# inference on the whole input
+y = model(x)
+
+# running inference on the first chunk
+y_chunk_1 = model(x[:, :input_length])
+# running inference on the second chunk, carefully shifting input
+start = chunk_size - extra_to_drop
+y_chunk_2 = model(x[:, start:(start + input_length)])
+# now we need to slice off the `extra_to_drop` from both outputs
+y_chunk_list = [y_chunk_1, y_chunk_2]
+if extra_to_drop > 0:
+    y_chunk_list = [chunk[:, :-extra_to_drop] for chunk in y_chunk_list]
+y_chunk = torch.cat(y_chunk_list, dim=1)
+
+y_trimmed = y[:, :y_chunk.size(1)]
+# finally compare the chunked inference to the original one.
+# we run inference only on two chunks, omitting handling the
+# padding on the right for simplicity. So the comparison
+# is done only for beginning of the output.
+diff = y_trimmed - y_chunk
+# should be the same
+assert torch.mean(torch.abs(diff)) < 1e-5
 ```
 
 # Takeaways

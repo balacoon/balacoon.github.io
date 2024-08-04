@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revoice Live</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #FFFFF0;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            position: relative;
+            height: 150px;
+            background: url('https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/headerimage.png') no-repeat top center / cover;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            animation: slideDown 1s ease-in-out;
+        }
+        .header-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        .left-content {
+            display: flex;
+            align-items: center;
+        }
+        .header-content img.icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+        }
+        .header-content .title {
+            font-size: 2em;
+            margin-left: 10px;
+        }
+        .header-content a.steam-download {
+            display: inline-block;
+            width: 200px;
+            height: 75px;
+            background: url('https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/steam-store-badge.webp') no-repeat center / contain;
+            border: none;
+            text-decoration: none;
+            text-indent: -9999px;
+        }
+        .intro-text {
+            width: 70%;
+            margin: 40px auto 20px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .separator {
+            width: 70%;
+            margin: 20px auto;
+            border-bottom: 1px solid #ddd;
+        }
+        .instructions {
+            width: 70%;
+            margin: 20px auto;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .original-audio {
+            width: 70%;
+            margin: 0px auto 20px;
+            text-align: center;
+        }
+        .original-audio h3 {
+            font-size: 1em;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+        .original-audio audio {
+            width: 250px;
+        }
+        table {
+            width: 70%;
+            margin: 10px auto 20px;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            animation: fadeIn 2s ease-in-out;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .person-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .person-info img {
+            border-radius: 50%;
+            width: 75px;
+            height: 75px;
+            object-fit: cover;
+            margin-right: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .person-info img:hover {
+            transform: scale(1.1);
+        }
+        .download-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .audio-column {
+            width: 250px;
+        }
+        audio {
+            width: 100%;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease-in-out;
+        }
+        a:hover {
+            color: #3e8e41;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.8em;
+            color: #555;
+            margin-top: auto;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="left-content">
+                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/appicon.jpg" alt="Icon" class="icon">
+                <span class="title">Revoice Live</span>
+            </div>
+            <a href="https://store.steampowered.com" class="steam-download">Steam Download</a>
+        </div>
+    </header>
+    <div class="intro-text">
+        Change your online voice with RevoiceLive, the easy-to-use app for macOS and Windows. Perfect for Zoom, Discord, and Google Meet, it allows you to change your voice effortlessly. Simply activate Voice Conversion in the RevoiceLive app, select RevoiceAudioDevice (on mac) or Voicemod (on win) as your microphone in your VoIP app, and start speaking.
+    </div>
+    <div class="separator"></div>
+    <div class="instructions">
+        Explore additional voices compatible with the RevoiceLive app for free!</br>Download your preferred voice and use the “Open” button in the app to select it.
+    </div>
+    <div class="original-audio">
+        <h3>Original Audio</h3>
+        <audio controls>
+            <source src="https://s3.amazonaws.com/your-bucket/original-audio.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    <table>
+        <tbody>
+            <tr>
+                <td class="person-info">
+                    <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/samuelljackson.png" alt="Samuel L. Jackson">
+                    <span>Samuel L. Jackson</span>
+                </td>
+                <td class="audio-column">
+                    <audio controls>
+                        <source src="https://s3.amazonaws.com/your-bucket/audio1.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </td>
+                <td><a href="https://s3.amazonaws.com/your-bucket/file1.bin" download>
+                    <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                </a></td>
+            </tr>
+            <!-- Add more rows as needed -->
+        </tbody>
+    </table>
+    <div class="footer">
+        Copyright 2024 Balacoon
+    </div>
+</body>
+</html>

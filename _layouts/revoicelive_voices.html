@@ -588,23 +588,17 @@
         gtag('js', new Date());
         gtag('config', 'AW-16731469501');
     </script>
-    <script>
-        var myConfObj = {
-            iframeMouseOver : false
-        }
-        window.addEventListener('blur',function(){
-            if(myConfObj.iframeMouseOver){
-                document.getElementById('copyright').innerText = "Clicked on widget";
-            }
-        });
-        document.getElementById('steam-widget').addEventListener('pointerenter',function(){
-            myConfObj.iframeMouseOver = true;
-            window.focus();
-        });
-        document.getElementById('steam-widget').addEventListener('pointerleave',function(){
-            myConfObj.iframeMouseOver = false;
-            window.focus();
-        });
-    </script>
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script>
+    window.addEventListener('blur',function(){	
+            window.setTimeout(function () {	
+                if (document.activeElement instanceof HTMLIFrameElement) {
+                    console.log("iframe click");
+                    document.getElementById('copyright').innerText = "Clicked on widget";
+                    window.focus();
+                }
+            }, 0);
+	});
+   </script>
 </body>
 </html>

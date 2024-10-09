@@ -556,6 +556,16 @@
         Copyright 2024 Balacoon
     </div>
     <script>
+        document.querySelector('a[href="#voice-library"]').addEventListener('click', function(e) {
+          e.preventDefault(); // Prevent default anchor click behavior
+      
+          document.querySelector('#voice-library').scrollIntoView({
+            behavior: 'smooth', // Smooth scroll effect
+            block: 'start' // Align at the start of the section
+          });
+        });
+    </script>
+    <script>
         let lastOrientation = null; // Initialize to null
         function updateVideoForOrientation() {
             const videoFrame = document.getElementById('video-frame');

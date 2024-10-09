@@ -209,7 +209,7 @@
 <body>
     <header>
         <div class="header-content">
-            <iframe src="https://store.steampowered.com/widget/2995800/" frameborder="0"></iframe>
+            <iframe id="steam-widget" src="https://store.steampowered.com/widget/2995800/" frameborder="0"></iframe>
             <img class="optional-voip-image" src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/voip.png" 
                 alt="Icon" 
                 style="float: right; height: 160px; width: auto;">
@@ -547,7 +547,7 @@
             <!-- Add more rows as needed -->
         </tbody>
     </table>
-    <div class="footer">
+    <div id="copyright" class="footer">
         Copyright 2024 Balacoon
     </div>
     <script>
@@ -587,6 +587,32 @@
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'AW-16731469501');
+    </script>
+    <script>
+        var myConfObj = {
+            iframeMouseOver : false
+        }
+        window.addEventListener('blur',function(){
+            if(myConfObj.iframeMouseOver){
+                document.getElementById('copyright').innerText = "Clicked on widget";
+            }
+        });
+        document.getElementById('steam-widget').addEventListener('mouseover',function(){
+            myConfObj.iframeMouseOver = true;
+            window.focus();
+        });
+        document.getElementById('steam-widget').addEventListener('mouseout',function(){
+            myConfObj.iframeMouseOver = false;
+            window.focus();
+        });
+        document.getElementById('steam-widget').addEventListener('touchstart',function(){
+            myConfObj.iframeMouseOver = true;
+            window.focus();
+        });
+        document.getElementById('steam-widget').addEventListener('touchend',function(){
+            myConfObj.iframeMouseOver = false;
+            window.focus();
+        });
     </script>
 </body>
 </html>

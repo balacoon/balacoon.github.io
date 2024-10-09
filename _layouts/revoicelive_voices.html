@@ -590,15 +590,29 @@
     </script>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
    <script>
-    window.addEventListener('blur',function(){	
-            window.setTimeout(function () {	
-                if (document.activeElement instanceof HTMLIFrameElement) {
-                    console.log("iframe click");
-                    document.getElementById('copyright').innerText = "Clicked on widget";
-                    window.focus();
+        function gtag_report_conversion(url) {
+            var callback = function () {
+                if (typeof(url) != 'undefined') {
+                window.location = url;
                 }
-            }, 0);
-	});
+            };
+            gtag('event', 'conversion', {
+                'send_to': 'AW-16731469501/hO0cCMvj6NoZEL3tl6o-',
+                'value': 1.0,
+                'currency': 'EUR',
+                'transaction_id': '',
+                'event_callback': callback
+            });
+            return false;
+        }
+        window.addEventListener('blur',function(){	
+                window.setTimeout(function () {	
+                    if (document.activeElement instanceof HTMLIFrameElement) {
+                        gtag_report_conversion();
+                        window.focus();
+                    }
+                }, 0);
+        });
    </script>
 </body>
 </html>

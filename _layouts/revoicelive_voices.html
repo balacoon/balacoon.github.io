@@ -19,7 +19,7 @@
         }
         header {
             position: relative;
-            height: 150px;
+            height: 230px;
             background: url('https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/headerimage.png') no-repeat top center / cover;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -38,33 +38,68 @@
             align-items: center;
             color: white;
         }
-        .left-content {
+        header iframe {
+            width: 100%;
+            max-width: 646px; /* Prevents iframe from being too wide */
+            height: 190px;
+        }
+        /* Hide the image when the screen is in landscape orientation */
+        @media (orientation: landscape) {
+            .optional-voip-image {
+                display: block;
+            }
+        }
+
+        /* Show the image in portrait orientation */
+        @media (orientation: portrait) {
+            .optional-voip-image {
+                display: none;
+            }
+        }
+
+        .video-container {
             display: flex;
-            align-items: center;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%; /* Make video take full width of container */
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 10px;
+
+            gap: 20px; /* Adds spacing between video and text */
         }
-        .header-content img.icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
+        .video {
+            flex: 1;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
-        .header-content .title {
-            font-size: 2em;
-            margin-left: 10px;
-        }
-        .header-content a.steam-download {
-            display: inline-block;
-            width: 200px;
-            height: 75px;
-            background: url('https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/steam-store-badge.webp') no-repeat center / contain;
+        iframe.video-frame {
+            width: 100%;
+            height: 325px;
             border: none;
-            text-decoration: none;
-            text-indent: -9999px;
         }
-        .intro-text {
-            width: 70%;
-            margin: 40px auto 20px;
-            text-align: center;
+        .video-text {
+            flex: 1;
+            font-size: 18px;
+            text-align: left;
+            color: #333;
             line-height: 1.6;
+            padding: 0 20px;
+        }
+        /* For portrait orientation */
+        @media (orientation: portrait) {
+            .video-container {
+                flex-direction: column;
+                align-items: center; /* Center the content when in column layout */
+            }
+            .video-frame {
+                width: 100%; /* Adjust to full width for portrait */
+            }
+            .video-text {
+                padding: 20px 0; /* Add padding to create space between video and text */
+            }
         }
         .separator {
             width: 70%;
@@ -174,20 +209,31 @@
 <body>
     <header>
         <div class="header-content">
-            <div class="left-content">
-                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/appiconname.png" 
-                     alt="Icon" 
-                     style="float: left; height: 100px; width: auto;">
-            </div>
-            <a href="https://store.steampowered.com/app/2995800/RevoiceLive" class="steam-download">Steam Download</a>
+            <iframe src="https://store.steampowered.com/widget/2995800/" frameborder="0"></iframe>
+            <img class="optional-voip-image" src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/voip.png" 
+                alt="Icon" 
+                style="float: right; height: 160px; width: auto;">
         </div>
     </header>
-    <div class="intro-text">
-        Change your online voice with RevoiceLive, the easy-to-use app for macOS and Windows. Perfect for Zoom, Discord, and Google Meet, it allows you to change your voice effortlessly. Simply activate Voice Conversion in the RevoiceLive app, select RevoiceAudioDevice (on mac) or Voicemod (on win) as your microphone in your VoIP app, and start speaking.
+    
+    <div class="video-container">
+        <div class="video">
+            <iframe id="video-frame" class="video-frame" src="https://www.youtube.com/embed/N1KXiT8ZEn0?rel=0&autoplay=1&enablejsapi=1" allowfullscreen></iframe>
+        </div>
+        <div class="video-text">
+            <p>RevoiceLive is compatible with any VoIP application and is very easy to set up. Follow these steps:</p>
+            <ul>
+                <li>Launch the app 🟢</li>
+                <li>Select the voice 👤</li>
+                <li>Start the engine 🚀</li>
+                <li>Select "Voicemod" as your mic 🎤️</li>
+            </ul>
+            <p>Watch the video to see how it works. Scroll down to the <b>Voice Library</b> to listen to examples and choose your new voice.</p>
+        </div>
     </div>
     <div class="separator"></div>
     <div class="instructions">
-        Explore additional voices compatible with the RevoiceLive app for free!</br>Download your preferred voice and use the “Open” button in the app to select it.
+        <p><b>Voice Library</b></p></b>Explore additional voices compatible with the RevoiceLive app for free!</br>Download your preferred voice and use the “Open” button in the app to select it.
     </div>
     <div class="original-audio">
         <h3>Original Audio</h3>
@@ -504,5 +550,34 @@
     <div class="footer">
         Copyright 2024 Balacoon
     </div>
+    <script>
+        let lastOrientation = null; // Initialize to null
+        function updateVideoForOrientation() {
+            const videoFrame = document.getElementById('video-frame');
+            const landscapeVideoURL = "https://www.youtube.com/embed/N1KXiT8ZEn0?rel=0&autoplay=1&enablejsapi=1"; // Horizontal video
+            // https://www.youtube.com/shorts/l26dq4Wcxdw
+            const portraitVideoURL = "https://www.youtube.com/embed/l26dq4Wcxdw?rel=0&autoplay=1&enablejsapi=1"; // Vertical video (replace with actual ID)
+            const currentOrientation = window.matchMedia("(orientation: portrait)").matches ? 'portrait' : 'landscape';
+            if (currentOrientation !== lastOrientation) {
+                if (currentOrientation === 'portrait') {
+                    // Portrait mode: use vertical video and larger height
+                    videoFrame.src = portraitVideoURL;
+                    videoFrame.style.height = "500px";  // Set desired height for portrait
+                } else {
+                    // Landscape mode: use horizontal video and standard height
+                    videoFrame.src = landscapeVideoURL;
+                    videoFrame.style.height = "325px";  // Set height for landscape
+                }
+                lastOrientation = currentOrientation; // Update lastOrientation
+            }
+        }
+    
+        // Listen for orientation changes
+        window.addEventListener("orientationchange", updateVideoForOrientation);
+        window.addEventListener("resize", updateVideoForOrientation);
+    
+        // Initial check when the page loads
+        updateVideoForOrientation();
+    </script>
 </body>
 </html>

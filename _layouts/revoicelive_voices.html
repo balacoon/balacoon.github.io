@@ -102,9 +102,25 @@
             }
         }
         .separator {
-            width: 70%;
-            margin: 20px auto;
-            border-bottom: 1px solid #ddd;
+            width: 100%;
+            padding: 10px;
+            background-color: #590675; /* A nice blue color */
+            color: white;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .separator:hover {
+            background-color: #050175; /* Darker blue on hover */
+        }
+
+        .separator span {
+            display: inline-block;
         }
         .instructions {
             width: 70%;
@@ -235,7 +251,9 @@
             <p>Watch the video to see how it works. Scroll down to the <a href="#voice-library"><b>Voice Library</b></a> to listen to examples and choose your new voice.</p>
         </div>
     </div>
-    <div class="separator"></div>
+    <div class="separator" id="scroll-button">
+        <span>Explore the Voice Library</span>
+    </div>
     <div id="voice-library" class="instructions">
         <h2>Voice Library</h2>
         <p>Explore additional voices compatible with the RevoiceLive app for free!<br>Download your preferred voice and use the “Open” button in the app to select it.</p>
@@ -563,6 +581,14 @@
             behavior: 'smooth', // Smooth scroll effect
             block: 'start' // Align at the start of the section
           });
+        });
+    </script>
+    <script>
+        document.querySelector('#scroll-button').addEventListener('click', function() {
+        document.querySelector('#voice-library').scrollIntoView({
+            behavior: 'smooth', // Smooth scroll effect
+            block: 'start' // Align at the start of the section
+        });
         });
     </script>
     <script>

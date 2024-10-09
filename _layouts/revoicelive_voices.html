@@ -597,19 +597,11 @@
                 document.getElementById('copyright').innerText = "Clicked on widget";
             }
         });
-        document.getElementById('steam-widget').addEventListener('mouseover',function(){
+        document.getElementById('steam-widget').addEventListener('pointerenter',function(){
             myConfObj.iframeMouseOver = true;
             window.focus();
         });
-        document.getElementById('steam-widget').addEventListener('mouseout',function(){
-            myConfObj.iframeMouseOver = false;
-            window.focus();
-        });
-        document.getElementById('steam-widget').addEventListener('touchstart',function(){
-            myConfObj.iframeMouseOver = true;
-            window.focus();
-        });
-        document.getElementById('steam-widget').addEventListener('touchend',function(){
+        document.getElementById('steam-widget').addEventListener('pointerleave',function(){
             myConfObj.iframeMouseOver = false;
             window.focus();
         });

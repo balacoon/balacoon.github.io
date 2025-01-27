@@ -42,7 +42,7 @@ A 2k subset is sampled.
 
 Audio samples can be found here:
 
-<iframe src="s3://balacoonwebsite/posts/dataset_super_resolution/sr_vctk_demo.html" width="800" height="600"></iframe>
+<iframe src="https://balacoonwebsite.s3.eu-north-1.amazonaws.com/posts/dataset_super_resolution/sr_vctk_demo.html" width="800" height="600"></iframe>
 
 ## DAPS testset
 
@@ -56,7 +56,7 @@ Dataset is segmented into sentence-level, a 2k subset is sampled.
 | AudioSR | 2.45 | 3.15 | 0.07 |
 | AP-BWE | 2.456 | 2.73 | 0.007 |
 
-<iframe src="s3://balacoonwebsite/posts/dataset_super_resolution/sr_daps_demo.html" width="800" height="600"></iframe>
+<iframe src="https://balacoonwebsite.s3.eu-north-1.amazonaws.com/posts/dataset_super_resolution/sr_daps_demo.html" width="800" height="600"></iframe>
 
 ## References
 <a id="1">[1]</a>

@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revoice Live</title>
+    <link rel="shortcut icon" href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/appicon.png">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #FAF9F6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            position: relative;
+            height: 230px;
+            background: url('https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/headerimage.png') no-repeat top center / cover;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            animation: slideDown 1s ease-in-out;
+        }
+        .header-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        header iframe {
+            width: 100%;
+            max-width: 646px; /* Prevents iframe from being too wide */
+            height: 190px;
+        }
+        /* Hide the image when the screen is in landscape orientation */
+        @media (orientation: landscape) {
+            .optional-voip-image {
+                display: block;
+            }
+        }
+
+        /* Show the image in portrait orientation */
+        @media (orientation: portrait) {
+            .optional-voip-image {
+                display: none;
+            }
+        }
+
+        .video-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%; /* Make video take full width of container */
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 10px;
+
+            gap: 20px; /* Adds spacing between video and text */
+        }
+        .video {
+            flex: 1;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        iframe.video-frame {
+            width: 100%;
+            height: 325px;
+            border: none;
+        }
+        .video-text {
+            flex: 1;
+            font-size: 18px;
+            text-align: left;
+            color: #333;
+            line-height: 1.6;
+            padding: 0 20px;
+            max-width: 100%;
+        }
+        /* For portrait orientation */
+        @media (orientation: portrait) {
+            .video-container {
+                flex-direction: column;
+                align-items: center; /* Center the content when in column layout */
+            }
+            .video-frame {
+                width: 100%; /* Adjust to full width for portrait */
+            }
+            .video-text {
+                padding: 20px 20px; /* Add padding to create space between video and text */
+            }
+        }
+        .separator {
+            width: 100%;
+            padding: 10px;
+            background-color: #590675; /* A nice blue color */
+            color: white;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .separator:hover {
+            background-color: #050175; /* Darker blue on hover */
+        }
+
+        .separator span {
+            display: inline-block;
+        }
+        .instructions {
+            width: 70%;
+            margin: 20px auto;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .instructions h2 {
+            font-size: 2em;  /* Adjust as necessary */
+            font-weight: bold;
+        }
+        .original-audio {
+            width: 70%;
+            margin: 0px auto 20px;
+            text-align: center;
+        }
+        .original-audio h3 {
+            font-size: 1em;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+        .original-audio audio {
+            width: 250px;
+        }
+        
+        /* navigation between tables */
+        .voices-navigation {
+            width: 70%;
+            margin: 5px auto 0px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .navigation-button {
+            background-color: transparent;
+            color: #590675;
+            border: none;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .navigation-button:hover {
+            color: #050175;
+        }
+        .navigation-title {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            flex: 1;
+        }
+        /* ------------------------- */
+
+        .table-container {
+            overflow: hidden;
+            position: relative;
+            width: 70%;
+            margin: 10px auto 20px;
+        }
+        .table-wrapper {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        .table {
+            min-width: 100%;
+        }
+        table {
+            width: 100%;
+            margin: 10px auto 20px;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            animation: fadeIn 2s ease-in-out;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .person-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .person-info img {
+            border-radius: 50%;
+            width: 75px;
+            height: 75px;
+            object-fit: cover;
+            margin-right: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .person-info img:hover {
+            transform: scale(1.1);
+        }
+        .download-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .audio-column {
+            width: 250px;
+        }
+        audio {
+            width: 100%;
+            min-width: 100px;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease-in-out;
+        }
+        a:hover {
+            color: #3e8e41;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.8em;
+            color: #555;
+            margin-top: auto;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <iframe id="steam-widget" src="https://store.steampowered.com/widget/2995800/" frameborder="0"></iframe>
+            <img class="optional-voip-image" src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/voip.png" 
+                alt="Icon" 
+                style="float: right; height: 160px; width: auto;">
+        </div>
+    </header>
+    
+    <!-- Promotional text section -->
+    <div class="promo-text" style="background-color: #ffeedd; padding: 15px; text-align: center; border-bottom: 2px solid #ff6600; font-size: 1.2em; font-weight: bold; color: #333;">
+        🌟 <b>Exclusive Offer:</b> Write a review for us on Steam and <span style="color: #ff6600;">claim a free key</span> for the <a href="https://store.steampowered.com/app/3348040/RevoiceLive__open_button/">Open-Button DLC</a>! 🎉  
+        <br>Send the link to your review to <a href="mailto:contact@balacoon.com">contact@balacoon.com</a> and unlock the entire voice collection today!
+    </div>
+
+    <div class="video-container">
+        <div class="video">
+            <iframe id="video-frame" class="video-frame" src="https://www.youtube.com/embed/N1KXiT8ZEn0?rel=0&autoplay=1&enablejsapi=1" allowfullscreen></iframe>
+        </div>
+        <div class="video-text">
+            <p><b>RevoiceLive</b> is a <a href="https://store.steampowered.com/app/2995800/RevoiceLive/?snr=1_5_1100__1100&utm_source=steamwidget">Steam app</a> compatible with any VoIP application and is very easy to set up. Follow these steps:</p>
+            <ul>
+                <li>Launch the app 🟢</li>
+                <li>Select the voice 👤</li>
+                <li>Start the engine 🚀</li>
+                <li>Select "Voicemod" as your mic 🎤️</li>
+            </ul>
+            <p>Watch the video to see how it works. Scroll down to the <a href="#voice-library">Voice Library</a> to listen to examples and choose your new voice.</p>
+        </div>
+    </div>
+    <div class="separator" id="scroll-button">
+        <span>Explore the Voice Library</span>
+    </div>
+    <div id="voice-library" class="instructions">
+        <h2>Voice Library</h2>
+        <p>Explore custom voices compatible with the RevoiceLive app!<br>Download your preferred voice and use the “Open” button in the app to select it.</p>
+    </div>
+    <div class="original-audio">
+        <h3>Original Audio</h3>
+        <audio controls>
+            <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/demo.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    <div class="voices-navigation">
+        <button class="navigation-button" onclick="previousTable()">◀</button>
+        <div class="navigation-title" id="navigation-title">Game Characters</div>
+        <button class="navigation-button" onclick="nextTable()">▶</button>
+    </div>
+    <div class="table-container">
+        <div class="table-wrapper" id="table-wrapper">
+            <div class="table">
+                <table>
+                    <tbody>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/arthur_morgan_red_dead_redemption_2.png" alt="Arthur Morgan">
+                                <span>Arthur the Cowboy</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/arthur_morgan_red_dead_redemption_2.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/arthur_morgan_red_dead_redemption_2.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/nathan_drake_uncharted.png" alt="Nathan Drake">
+                                <span>Nathan the Treasure Hunter</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/nathan_drake_uncharted.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/nathan_drake_uncharted.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/the_narrator_stanley_parable.png" alt="The Narrator">
+                                <span>The Narrator with the Plan</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/the_narrator_stanley_parable.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/the_narrator_stanley_parable.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/kratos_god_of_war_series.png" alt="Kratos">
+                                <span>Spartan Warrior God</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/kratos_god_of_war_series.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/kratos_god_of_war_series.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/ellie_last_of_us.png" alt="Ellie">
+                                <span>Ellie the Survivor</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/ellie_last_of_us.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/ellie_last_of_us.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/joel_miller_last_of_us.png" alt="Ellie">
+                                <span>Joel the Protector</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/joel_miller_last_of_us.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/joel_miller_last_of_us.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/shepard_mass_effect_series.png" alt="Shepard">
+                                <span>The Commander</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/shepard_mass_effect_series.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/shepard_mass_effect_series.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/shepardin_mass_effect_series.png" alt="Shepardin">
+                                <span>Commander Infiltrator</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/shepardin_mass_effect_series.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/shepardin_mass_effect_series.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/geralt_of_rivia_the_witcher_series.png" alt="Gerald">
+                                <span>The Monster Hunter</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/geralt_of_rivia_the_witcher_series.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/geralt_of_rivia_the_witcher_series.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/glados_portal_2.png" alt="Glados">
+                                <span>Sarcastic AI</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/glados_portal_2.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/glados_portal_2.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/duke_nukem_duke_nukem_series.png" alt="Duke">
+                                <span>Duke the Hero</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/duke_nukem_duke_nukem_series.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/duke_nukem_duke_nukem_series.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/cortana_halo_series.png" alt="Cortana">
+                                <span>Smart AI</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/cortana_halo_series.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/cortana_halo_series.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/the_joker_batman_arkham_series.png" alt="Joker">
+                                <span>The Chaotic Jester</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/the_joker_batman_arkham_series.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/the_joker_batman_arkham_series.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/ashe_overwatch.png" alt="Ashe">
+                                <span>The Outlaw Gunslinger</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/ashe_overwatch.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/ashe_overwatch.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/claptrap_borderlands_series.png" alt="Claptrap">
+                                <span>The Quirky Robot</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/claptrap_borderlands_series.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/claptrap_borderlands_series.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/samuelljackson.png" alt="Samuel L. Jackson">
+                                <span>Samuel the Motherfucker</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/slj.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/slj.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/keanureeves.png" alt="Keanu Reeves">
+                                <span>Keanu the Chosen One</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/keanureeves.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/keanureeves.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/tomholland.png" alt="Tom Holland">
+                                <span>Tom the Web-Slinger</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/tomholland.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/tomholland.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/jenniferaniston.png" alt="Jennifer Aniston">
+                                <span>Jennifer the Friend</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/jenniferaniston.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/jenniferaniston.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/johnnydepp.png" alt="Johnny Depp">
+                                <span>Johnny the Pirate</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/johnnydepp.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/johnnydepp.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/jenniferlawrence.png" alt="Jennifer Lawrence">
+                                <span>Jennifer the Mockingjay</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/jenniferlawrence.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/jenniferlawrence.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/merylstreep.png" alt="Meryl Streep">
+                                <span>Meryl the Oscar Queen</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/merylstreep.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/merylstreep.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/angelinajolie.png" alt="Angelina Jolie">
+                                <span>Angelina the Tomb Raider</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/angelinajolie.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/angelinajolie.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/emmastone.png" alt="Emma Stone">
+                                <span>Emma the Stone of Comedy</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/emmastone.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/emmastone.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/chrishemsworth.png" alt="Chris Hemsworth">
+                                <span>Chris the God of Thunder</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/chrishemsworth.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/chrishemsworth.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/danielradcliffe.png" alt="Daniel Radcliffe">
+                                <span>Daniel the Wizard</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/danielradcliffe.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/danielradcliffe.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/timotheechalamet.png" alt="Timothée Chalamet">
+                                <span>Timothée the Heartthrob</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/timotheechalamet.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/timotheechalamet.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/juliaroberts.png" alt="Julia Roberts">
+                                <span>Julia the Pretty Woman</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/juliaroberts.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/juliaroberts.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/jennaortega.png" alt="Jenna Ortega">
+                                <span>Jenna the Scream Queen</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/jennaortega.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/jennaortega.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/natalieportman.png" alt="Natalie Portman">
+                                <span>Natalie the Swan</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/natalieportman.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/natalieportman.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>  
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/barackobama.png" alt="Barack Obama">
+                                <span>Barack the Hope-Bringer</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/barackobama.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/barackobama.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/donaldtrump.png" alt="Donald Trump">
+                                <span>Donald the Deal-Maker</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/donaldtrump.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/donaldtrump.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/berniesanders.png" alt="Bernie Sanders">
+                                <span>Bernie the Revolutionist</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/berniesanders.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/berniesanders.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/taylorswift.png" alt="Taylor Swift">
+                                <span>Taylor the Songstress</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/taylorswift.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/taylorswift.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/arianagrande.png" alt="Ariana Grande">
+                                <span>Ariana the Vocal Virtuoso</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/arianagrande.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/arianagrande.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            
+            <div class="table">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/m.png" alt="Denny">
+                                <span>Denny</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/denny.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/denny.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/f.png" alt="Elaine">
+                                <span>Elaine</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/elaine.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/elaine.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/f.png" alt="Julia">
+                                <span>Julia</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/julia.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/julia.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/f.png" alt="Maria">
+                                <span>Maria</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/maria.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/maria.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/m.png" alt="Nicholas">
+                                <span>Nicholas</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/nicholas.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/nicholas.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/f.png" alt="Raz">
+                                <span>Raz</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/raz.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/raz.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/f.png" alt="Sheila">
+                                <span>Sheila</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/sheila.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/sheila.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                        <tr>
+                            <td class="person-info">
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/pictures/m.png" alt="Steve">
+                                <span>Steve</span>
+                            </td>
+                            <td class="audio-column">
+                                <audio controls>
+                                    <source src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/samples/steve.mp3" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                            <td><a href="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/voices/steve.addon" download>
+                                <img src="https://revoicelivevoices.s3.eu-north-1.amazonaws.com/website/download.png" alt="Download" class="download-icon">
+                            </a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <div id="copyright" class="footer">
+        Copyright 2024 Balacoon
+    </div>
+    <script>
+        document.querySelector('a[href="#voice-library"]').addEventListener('click', function(e) {
+          e.preventDefault(); // Prevent default anchor click behavior
+      
+          document.querySelector('#voice-library').scrollIntoView({
+            behavior: 'smooth', // Smooth scroll effect
+            block: 'start' // Align at the start of the section
+          });
+        });
+    </script>
+    <script>
+        document.querySelector('#scroll-button').addEventListener('click', function() {
+        document.querySelector('#voice-library').scrollIntoView({
+            behavior: 'smooth', // Smooth scroll effect
+            block: 'start' // Align at the start of the section
+        });
+        });
+    </script>
+    <script>
+        let lastOrientation = null; // Initialize to null
+        function updateVideoForOrientation() {
+            const videoFrame = document.getElementById('video-frame');
+            const landscapeVideoURL = "https://www.youtube.com/embed/t-ZdJKCqwYI?rel=0&autoplay=1&enablejsapi=1"; // Horizontal video
+            // https://www.youtube.com/shorts/l26dq4Wcxdw
+            const portraitVideoURL = "https://www.youtube.com/embed/l26dq4Wcxdw?rel=0&autoplay=1&enablejsapi=1"; // Vertical video (replace with actual ID)
+            const currentOrientation = window.matchMedia("(orientation: portrait)").matches ? 'portrait' : 'landscape';
+            if (currentOrientation !== lastOrientation) {
+                if (currentOrientation === 'portrait') {
+                    // Portrait mode: use vertical video and larger height
+                    videoFrame.src = portraitVideoURL;
+                    videoFrame.style.height = "500px";  // Set desired height for portrait
+                } else {
+                    // Landscape mode: use horizontal video and standard height
+                    videoFrame.src = landscapeVideoURL;
+                    videoFrame.style.height = "325px";  // Set height for landscape
+                }
+                lastOrientation = currentOrientation; // Update lastOrientation
+            }
+        }
+    
+        // Listen for orientation changes
+        window.addEventListener("orientationchange", updateVideoForOrientation);
+        window.addEventListener("resize", updateVideoForOrientation);
+    
+        // Initial check when the page loads
+        updateVideoForOrientation();
+    </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16731469501">
+    </script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-16731469501');
+    </script>
+   <script>
+        function gtag_report_conversion(url) {
+            var callback = function () {
+                if (typeof(url) != 'undefined') {
+                window.location = url;
+                }
+            };
+            gtag('event', 'conversion', {
+                'send_to': 'AW-16731469501/hO0cCMvj6NoZEL3tl6o-',
+                'value': 0.1,
+                'currency': 'EUR',
+                'transaction_id': '',
+                'event_callback': callback
+            });
+            return false;
+        }
+        window.addEventListener('blur',function(){	
+                window.setTimeout(function () {	
+                    if (document.activeElement instanceof HTMLIFrameElement) {
+                        gtag_report_conversion();
+                        window.focus();
+                    }
+                }, 0);
+        });
+   </script>
+
+    <script>
+        let currentTable = 0;
+        const totalTables = 5;
+        const tableWrapper = document.getElementById('table-wrapper');
+        const panelTitle = document.getElementById('navigation-title');
+
+        // Titles for each table panel
+        const tableTitles = ["Game Characters", "Actors", "Politicians", "Mucisians", "Public domain"];
+        function updatePanel() {
+            tableWrapper.style.transform = `translateX(-${currentTable * 100}%)`;
+            panelTitle.textContent = tableTitles[currentTable];
+        }
+
+        function nextTable() {
+            currentTable = (currentTable + 1) % totalTables;
+            updatePanel();
+        }
+
+        function previousTable() {
+            currentTable = (currentTable - 1 + totalTables) % totalTables;
+            updatePanel();
+        }
+    </script>
+
+
+</body>
+</html>

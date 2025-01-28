@@ -20,19 +20,27 @@ aiming a usecase of preparing a TTS dataset (24kHz) from an ASR one (16kHz).
 
 We compare the following methods:
 
-* SoX - vanilla upsampling via interpolation, the higher frequencies are not restored
+* SoX - vanilla upsampling via interpolation, the higher frequencies are not restored. 
 * [Resemble Enhance](https://github.com/resemble-ai/resemble-enhance) - diffusion-based denoising / enhancement / upsampling.
 * [AudioSR](https://github.com/haoheliu/versatile_audio_super_resolution) - diffusion-based audio super resolution.
 * [AP-BWE](https://yxlu-0102.github.io/AP-BWE/) - GAN-based bandwidth extension in spectral domain.
 
+Processing speed per file on a single RTX 3090:
+
+| Method | Resemble Enhance | AudioSR | AP-BWE |
+| --- | :---: | :---: | :---: |
+| Processing speed per file, sec | 8.0 | 5.0 | 0.035 |
+
 We measure intelligibility, audio quality and speaker similarity of the processed audio on two datasets: VCTK[[2]](#2) and DAPS[[3]](#3). First represents clean audio that simply lacks higher frequencies. Second - is a more challenging usecase of speech recorded on consumer microphones with background noise present.
 We use ECAPA[[4]](#4) speaker encoder by [Speechbrain](https://huggingface.co/speechbrain/spkrec-ecapa-voxceleb) to extract speaker representation and measure speaker similarity. We run speech recognition with [Conformer-Transducer ASR model by NVIDIA](https://huggingface.co/nvidia/stt_en_conformer_transducer_xlarge#model-architecture) to evaluate intelligibility in terms of Character Error Rate. Finally, we use a pre-trained Mean Opinion Score estimator UTMOS[[5]](#5) to access the naturalness.
+Keep in mind that all the metrics are computed on 16khz audio, so they are mainly tracking if upsampling
+introduces any changes to the information that is already there. 
 
 ## VCTK testset
 
 A 2k subset is sampled.
 
-| Model | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(inverted cosine distance↓)
+| Method | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(inverted cosine distance↓) |
 | --- | :---: | :---: | :---: |
 | original audio | 4.078 | 0.178 | 0 |
 | SoX | 4.075 | 0.178 | 0.002 |
@@ -40,7 +48,13 @@ A 2k subset is sampled.
 | AudioSR | 4.05 | 0.178 | 0.039 |
 | AP-BWE | 4.06 | 0.178 | 0.042 |
 
-Audio samples can be found here:
+Example of the upsampling in spectral domain:
+
+<figure style="width: 300px" class="align-center">
+  <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/dataset_super_resolution/vctk_example.png" alt="">
+</figure>
+
+Audio samples:
 
 <iframe src="https://balacoonwebsite.s3.eu-north-1.amazonaws.com/posts/dataset_super_resolution/sr_vctk_demo.html" width="800" height="600"></iframe>
 
@@ -48,7 +62,7 @@ Audio samples can be found here:
 
 Dataset is segmented into sentence-level, a 2k subset is sampled.
 
-| Model | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(inverted cosine distance↓)
+| Model | Naturalness(MOS↑)  | Intelligibility(CER, %↓) | Similarity(inverted cosine distance↓) |
 | --- | :---: | :---: | :---: |
 | original audio | 2.48 | 2.75 | 0 |
 | SoX | 2.48 | 2.748 | 0.008 |
@@ -56,7 +70,23 @@ Dataset is segmented into sentence-level, a 2k subset is sampled.
 | AudioSR | 2.45 | 3.15 | 0.07 |
 | AP-BWE | 2.456 | 2.73 | 0.007 |
 
+Example of the upsampling in spectral domain:
+
+<figure style="width: 300px" class="align-center">
+  <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/dataset_super_resolution/daps_example.png" alt="">
+</figure>
+
+Audio samples:
+
 <iframe src="https://balacoonwebsite.s3.eu-north-1.amazonaws.com/posts/dataset_super_resolution/sr_daps_demo.html" width="800" height="600"></iframe>
+
+## Conclusions
+
+`Resemble-Enhance` strives to also perform denoising and enhancement.
+It corrupts the noisy audio files substantially which is reflected in greatly degraded intelligibility.
+Both `AudioSR` and `AP-BWE` are very gentle to existing information and do not change the metrics.
+Former adds more details and combines with existing high-freq information more smoothly.
+Latter is however almost 150x faster. Our pick is `AudioSR` if the amount of data is managable, otherwise `AP-BWE`.
 
 ## References
 <a id="1">[1]</a>

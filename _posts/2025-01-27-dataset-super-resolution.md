@@ -50,7 +50,7 @@ A 2k subset is sampled.
 
 Example of the upsampling in spectral domain:
 
-<figure style="width: 300px" class="align-center">
+<figure style="width: 800px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/dataset_super_resolution/vctk_example.png" alt="">
 </figure>
 
@@ -72,7 +72,7 @@ Dataset is segmented into sentence-level, a 2k subset is sampled.
 
 Example of the upsampling in spectral domain:
 
-<figure style="width: 300px" class="align-center">
+<figure style="width: 800px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/dataset_super_resolution/daps_example.png" alt="">
 </figure>
 

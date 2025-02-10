@@ -1,12 +1,12 @@
 ---
-title: "Tracing mHubert: balacoon/mhubert at HF"
+title: "Tracing mHuBERT"
 last_modified_at: 2025-02-10T10:20:02+05:00
 toc: true
 categories:
   - Blog
 tags:
   - text-to-speech
-  - Hubert
+  - HuBERT
   - tracing
 ---
 
@@ -34,7 +34,7 @@ Many thanks to @dathudeptrai for [posting](https://huggingface.co/utter-project/
 Here are some notes and practical findings from the mHuBERT model tracing.
 Please drop a message if any of these are incorrect or incomplete.
 * The attention mask is ignored by mHuBERT. As a result, during batched inference, you can get different discrete codes depending on the padding:
-<figure style="width: 600px" class="align-center">
+<figure style="width: 500px" class="align-center">
   <img src="{{ site.url }}{{ site.baseurl }}/assets/images/posts/mhubert/batching.png" alt="">
   <figcaption class="figure-caption text-center">Effect of padding during batching</figcaption>
 </figure>

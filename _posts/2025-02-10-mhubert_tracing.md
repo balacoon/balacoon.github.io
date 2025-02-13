@@ -24,7 +24,7 @@ In this tracing, we integrate the clustering step into the Torch module, elimina
 Unfortunately, the FAISS index for clustering step is only available for model after the second iteration.
 As a result, the traced model is slightly less capable.
 
-The traced model is available at [balacoon/mhubert](https://huggingface.co/balacoon/mhubert).
+The traced model is available at [balacoon/mhubert-147](https://huggingface.co/balacoon/mhubert-147).
 The full notebook used for tracing and testing can be found [here](https://github.com/balacoon/balacoon.github.io/blob/master/assets/posts/mhubert/trace_hubert.ipynb).
 
 Many thanks to @dathudeptrai for [posting](https://huggingface.co/utter-project/mHuBERT-147/discussions/6) a snippet on discrete tokens extraction.

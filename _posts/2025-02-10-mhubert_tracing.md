@@ -39,6 +39,5 @@ Please drop a message if any of these are incorrect or incomplete.
   <figcaption class="figure-caption text-center">Effect of padding during batching</figcaption>
 </figure>
 
-* Tracing in half precision works for short inputs (<5 sec) but fails for longer ones. Full precision works fine.
 * mHuBERT applies mean/std normalization to input audio.
 * `faiss` has a lot of clustering methods implemented. Fortunately a linear transformation was used for clustering in mHuBERT, allowing it to be extracted into a transformation matrix. See `TorchFaiss` in the notebook for details.

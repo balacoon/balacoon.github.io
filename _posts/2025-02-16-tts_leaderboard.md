@@ -40,10 +40,11 @@ A leaderboard for speech generation models
 There are other tools for objective evaluation of speech generation, including [ZS-TTS-Evaluation](https://github.com/Edresson/ZS-TTS-Evaluation), [seed-tts-eval](https://github.com/BytedanceSpeech/seed-tts-eval), [tts-scores](https://github.com/neonbjb/tts-scores), [evaluate-zero-shot-tts](https://github.com/keonlee9420/evaluate-zero-shot-tts), and another leaderboard called [TTSDS Scores](https://huggingface.co/spaces/ttsds/benchmark).
 Our contribution focuses on:
 * Simple addition of new metrics and test sets
-* Support for various speech generation models (vocoders, zero-shot TTS, zero-shot VC, etc.)
+* Support for various speech generation models (vocoders, zero-shot TTS, zero-shot VC, etc.), where tools can be reused
 * Mature engineering with easy installation and fast evaluation
+* Allowing to listen to the generated speech side-by-side to build a relation between metrics and perceived quality
 
-Having developed most of these tools internally, we are now making them publicly available.
+Having most of these tools internally for a while, we are now making them publicly available.
 
 We plan to expand the leaderboard with more models and add new metrics to the library.
 We welcome your suggestions and contributions!

@@ -31,7 +31,7 @@ An open-source library for objective evaluation of speech generation models
 ### `speech_gen_eval_testsets` ([huggingface](https://huggingface.co/datasets/balacoon/speech_gen_eval_testsets))
 A collection of test sets for evaluating speech generation models
 
-### `speech_gen_baselines` ([github](https://github.com/balacoon/speech_gen_baselines))
+### `speech_gen_baselines` ([huggingface](https://huggingface.co/datasets/balacoon/speech_gen_baselines))
 A dataset containing synthetic speech from common models and their evaluation results
 
 ### `TTSLeaderboard` ([huggingface](https://huggingface.co/spaces/balacoon/TTSLeaderboard))

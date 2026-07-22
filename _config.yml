@@ -1,53 +1,20 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
-
-# Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
 title: Balacoon
-email:
-description: >- # this means to ignore newlines until "baseurl:"
-  Text-to-speech tools and resources
+description: >-
+  Sound like anyone with Revoice. Change your voice in audio messages or social media reels.
 minimal_mistakes_skin: default
 search: false
 
-# Build settings
 markdown: kramdown
 remote_theme: mmistakes/minimal-mistakes
-# Outputting
 permalink: /:categories/:title/
-paginate: 5 # amount of posts to show
-paginate_path: /page:num/
-timezone: CEST # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone: CEST
 
 include:
   - _pages
 
-# Exclude from processing.
-# The following items will not be processed, by default. Create a custom list
-# to override the default setting.
-# exclude:
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
 exclude:
-  - rebuild_packages_docs.sh
   - packages/
 
-# Plugins (previously gems:)
 plugins:
   - jekyll-paginate
   - jekyll-sitemap
@@ -57,85 +24,20 @@ plugins:
   - jekyll-include-cache
   - jekyll-seo-tag
 
-analytics:
-  provider: "google-gtag"
-  google:
-    tracking_id: "G-XJCNNC3FM2"
-    anonymize_ip: false # default
-
-author:
-  name   : "Balacoon"
-  avatar : "/assets/images/logo.png"
-  links:
-    - label: "e-mail"
-      icon: "fas fa-fw fa-envelope-square"
-      url: "mailto:contact@balacoon.com"
-
-footer:
-  links:
-    - label: "GitHub"
-      icon: "fab fa-fw fa-github"
-      url: "https://github.com/balacoon"
-    - label: "Slack"
-      icon: "fab fa-fw fa-slack"
-      url: "https://join.slack.com/t/balacoon/shared_invite/zt-1syqpvq75-s7iCBJhZcQrsmrLrAU3fhw"
-
-defaults:
-  # _pages
-  - scope:
-      path: "_pages"
-      type: pages
-    values:
-      layout: single
-      author_profile: true
-  # _posts
-  - scope:
-      path: ""
-      type: posts
-    values:
-      layout: single
-      author_profile: true
-      read_time: true
-      comments: true
-      share: true
-      related: true
-  # freeware
-  - scope:
-      path: "freeware"
-      type: pages
-    values:
-      layout: single
-      author_profile: false
-      sidebar:
-        title: "How-to"
-        nav: sidebar-freeware
-  # products
-  - scope:
-      path: "products"
-      type: pages
-    values:
-      layout: single
-      author_profile: false
-      sidebar:
-        title: "Check out"
-        nav: sidebar-products
-
 landing:
   page_title: Revoice
   appstore_link: https://apps.apple.com/us/app/revoice-change-your-voice/id6470013959
   playstore_link: https://play.google.com/store/apps/details?id=com.app.vc
-  presskit_download_link: https://balacoon.com/                                          # Enter a link to downloadable file or (e.g. public Dropbox link to a .zip file). 
+  presskit_download_link: https://balacoon.com/
   app_icon: assets/landing/appicon.jpg
   app_name: "Revoice: Change your voice"
   app_price: ""
   app_description: Sound like anyone with Revoice. Change your voice in audio messages or social media reels. Select the target voice from a preset library with hundreds of celebrities.
   enable_smart_app_banner: true
-  # Information About Yourself
   your_name: Balacoon
   your_link: https://balacoon.com
   email_address: contact@balacoon.com
 
-  # Feature List                            Edit, add or remove features to be presented.
   features:
     - title: Sound like anyone
       description: Our voice-changing technology allows you to mimic anyone. Play with your intonation and record in a quiet environment to get better results.
@@ -173,14 +75,13 @@ landing:
       description: The app is created for entertainment purposes only. Use responsibly.
       fontawesome_icon_name: bell
 
-  # Theme Settings
   topbar_color                              : "#000000"
   topbar_transparency                       : 0.1
   topbar_title_color                        : "#ffffff"
-  cover_image                               : assets/landing/headerimage.png                    # Replace with alternative image path or image URL.
+  cover_image                               : assets/landing/headerimage.png
   cover_overlay_color                       : "#363b3d"
   cover_overlay_transparency                : 0.8
-  device_color                              : black                                     # Set to: blue, black, yellow, coral or white.
+  device_color                              : black
   body_background_color                     : "#ffffff"
   link_color                                : "#1d63ea"
   app_title_color                           : "#ffffff"
@@ -193,4 +94,3 @@ landing:
   social_icons_foreground_color             : "#666666"
   social_icons_background_color             : "#e6e6e6"
   footer_text_color                         : "#666666"
-  

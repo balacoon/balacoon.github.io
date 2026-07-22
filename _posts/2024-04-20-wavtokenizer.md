@@ -1,16 +1,29 @@
 ---
-title: "Streaming Inference with Convolutional Layers"
-last_modified_at: 2024-04-20T10:20:02+05:00
+title: "Picking inside WavTokenizer"
+last_modified_at: 2024-10-11T10:20:02+05:00
 toc: true
 categories:
   - Blog
 tags:
   - text-to-speech
-  - streaming
-  - convolution
+  - vocoding
 ---
 
-In this post, we explore how to apply convolutional layers to infinitely long inputs, specifically focusing on how to process inputs in chunks to minimize latency. For instance, in text-to-speech applications, instead of synthesizing an entire sentence at once, we prefer to generate and play back audio in segments. While recurrent or autoregressive networks are inherently `causal` and thus well-suited for streaming processing, convolutional layers present more challenges and require careful handling.
+This post is dedicated to the [WavTokenizer](https://arxiv.org/abs/2408.16532) - a new discrete vocoder,
+that uses a single codebook to encode speech. Apparently noone told authors that you need at least 8,
+and they got away with just one. This is truly impressive, because the natural question is where does all
+the information go, given there is just 4k possible values per frame. Obvious guess is that some information
+is recorded through a sequence of tokens, which should give much bigger space.
+In this post we try to get a basic idea about it, playing with input and data and checking how it impacts extracted tokens.
+
+# Speaker identity
+
+To explore how speaker identity is encoded, we will analyze codes of the same audios passed through
+voice conversion. Such audio is perfectly aligned in time, the only thing that is different is the speaker
+identity and absolute pitch. We'll take demo samples from [RevoiceLive](https://balacoon.com/revoicelive/)
+Voice Library.
+
+
 
 # Conv1d
 
